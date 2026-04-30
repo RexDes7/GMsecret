@@ -52,7 +52,7 @@ export function HeroSection() {
           </p>
           <h1
             id="hero-heading"
-            className="font-[family-name:var(--font-heading)] text-[clamp(1.75rem,4.4vw,3.25rem)] font-bold uppercase leading-[1.1] tracking-[0.005em] [text-wrap:balance]"
+            className="font-[family-name:var(--font-heading)] text-[clamp(1.75rem,4.4vw,3.25rem)] font-bold uppercase leading-[1.22] tracking-[0.005em] [text-wrap:balance]"
           >
             {t.title}
           </h1>

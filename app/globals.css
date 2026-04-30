@@ -62,7 +62,11 @@
   --font-sans:
     var(--font-dudka, ui-sans-serif), system-ui, -apple-system, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-heading: var(--font-cinzel, var(--font-sans));
+  /* Per-glyph fallback chain: Cinzel covers Latin (no Cyrillic glyphs),
+     Dudka covers Cyrillic. Both must be listed explicitly so the browser
+     falls through *per glyph* — `var(font, fallback)` only triggers if
+     the variable itself is undefined, not if the font lacks the glyph. */
+  --font-heading: var(--font-cinzel), var(--font-dudka), serif;
   --font-mono:
     var(--font-geist-mono, ui-monospace), SFMono-Regular, Menlo, monospace;
 
@@ -136,8 +140,10 @@
   h6 {
     font-family: var(--font-heading);
     font-weight: 700;
-    line-height: 1.15;
-    letter-spacing: -0.01em;
+    /* Slightly looser than 1.15 to keep room for accented Cyrillic glyphs
+       (Й, Ё) when wrapped onto multiple lines. */
+    line-height: 1.2;
+    letter-spacing: -0.005em;
   }
 
   /* Subtle parchment-like glow for primary CTAs */
