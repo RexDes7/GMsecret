@@ -164,6 +164,18 @@
   }
 }
 
+/* Shared marquee keyframe used by DndMarquee and ItemsStrip. Defined
+   globally so the components are self-sufficient and unaffected by
+   styled-jsx scoping. */
+@keyframes gmsh-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 /* Selection */
 ::selection {
   background: color-mix(in oklch, var(--primary) 60%, transparent);

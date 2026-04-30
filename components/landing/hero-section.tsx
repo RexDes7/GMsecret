@@ -47,25 +47,28 @@ export function HeroSection() {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="relative max-w-2xl"
         >
+          <p className="mb-5 text-xs font-semibold uppercase tracking-[0.32em] text-primary/85 sm:text-sm">
+            {t.eyebrow}
+          </p>
           <h1
             id="hero-heading"
-            className="text-balance font-[family-name:var(--font-heading)] text-4xl font-bold uppercase leading-[1.02] tracking-[0.005em] sm:text-6xl md:text-[4.5rem]"
+            className="font-[family-name:var(--font-heading)] text-[clamp(2.25rem,7vw,4.5rem)] font-bold uppercase leading-[1.08] tracking-[0.01em] [text-wrap:balance]"
           >
             {t.title}
           </h1>
-          <p className="mt-7 max-w-md text-balance text-base leading-relaxed text-foreground/80 sm:text-lg">
+          <p className="mt-7 max-w-md text-base leading-relaxed text-foreground/80 sm:text-lg [text-wrap:pretty]">
             {t.subtitle}
           </p>
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/register"
-              className="inline-flex items-center justify-center rounded-full bg-foreground px-10 py-3.5 text-sm font-semibold uppercase tracking-[0.24em] text-background shadow-lg transition-transform hover:-translate-y-0.5"
+              className="inline-flex items-center justify-center rounded-full bg-foreground px-9 py-3.5 text-[0.78rem] font-semibold uppercase tracking-[0.22em] text-background shadow-[0_10px_30px_-10px_rgba(255,255,255,0.45)] transition-transform hover:-translate-y-0.5"
             >
               {t.ctaPrimary}
             </Link>
             <Link
               href="/tools"
-              className="inline-flex items-center justify-center rounded-full border border-foreground/30 bg-black/40 px-10 py-3.5 text-sm font-semibold uppercase tracking-[0.24em] text-foreground/95 backdrop-blur transition-colors hover:border-foreground/70"
+              className="inline-flex items-center justify-center rounded-full border border-foreground/35 bg-black/40 px-9 py-3.5 text-[0.78rem] font-semibold uppercase tracking-[0.22em] text-foreground/95 backdrop-blur transition-colors hover:border-foreground/70"
             >
               {t.ctaSecondary}
             </Link>

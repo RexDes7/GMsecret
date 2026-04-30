@@ -1,7 +1,3 @@
-"use client";
-
-import { useReducedMotion } from "framer-motion";
-
 /**
  * Inline D&D dragon-shield mark used as the divider between repeated
  * "DUNGEONS & DRAGONS" labels in the marquee. Pure SVG so it scales
@@ -56,15 +52,9 @@ function MarqueeRow({
 /**
  * Two stacked "DUNGEONS & DRAGONS" running tapes: top scrolls left, bottom
  * scrolls right. The contrast band reads as a divider between sections.
- *
- * Why an SSR-safe global keyframe?
- * `<style jsx>` would scope the keyframe name and break the Tailwind
- * arbitrary `[animation:gmsh-marquee_…]` reference, so we use
- * `<style jsx global>` to keep the name unscoped.
+ * The shared `gmsh-marquee` keyframe lives in `app/globals.css`.
  */
 export function DndMarquee() {
-  const prefersReducedMotion = useReducedMotion();
-
   return (
     <section
       aria-label="Dungeons & Dragons"
@@ -75,22 +65,6 @@ export function DndMarquee() {
         <div aria-hidden className="h-px bg-black/15" />
         <MarqueeRow direction="reverse" />
       </div>
-
-      {/* Without animation when the user prefers reduced motion: the
-          translateX never starts, so nothing scrolls. We still render the
-          row so the section is not empty. */}
-      {prefersReducedMotion ? null : (
-        <style jsx global>{`
-          @keyframes gmsh-marquee {
-            from {
-              transform: translateX(0);
-            }
-            to {
-              transform: translateX(-50%);
-            }
-          }
-        `}</style>
-      )}
     </section>
   );
 }
