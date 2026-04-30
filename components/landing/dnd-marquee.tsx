@@ -21,30 +21,26 @@ function DndShield({ className = "size-7" }: { className?: string }) {
   );
 }
 
-const ITEMS = ["DUNGEONS & DRAGONS"] as const;
-
 /**
- * Bright off-white marquee strip of "DUNGEONS & DRAGONS" labels with
- * dragon-shield dividers. The track scrolls infinitely; we duplicate the
- * content so the seam stays off-screen.
+ * One running line of "DUNGEONS & DRAGONS" labels with shield dividers.
+ * The track is duplicated so the seam stays off-screen during the loop;
+ * `direction="reverse"` reverses the scroll without redefining keyframes.
  */
-export function DndMarquee() {
-  const prefersReducedMotion = useReducedMotion();
-  const items = Array.from({ length: 6 }, (_, i) => ITEMS[i % ITEMS.length]!);
-
+function MarqueeRow({
+  direction = "forward",
+}: {
+  direction?: "forward" | "reverse";
+}) {
+  const labels = Array.from({ length: 8 }, () => "DUNGEONS & DRAGONS");
   return (
-    <section
-      aria-label="D&D"
-      className="relative w-full overflow-hidden border-y border-black/10 bg-[#f6e9d4] text-[#2c0e16]"
-    >
+    <div className="overflow-hidden">
       <div
-        className={
-          prefersReducedMotion
-            ? "flex flex-nowrap items-center gap-10 whitespace-nowrap py-4"
-            : "flex w-max flex-nowrap items-center gap-10 whitespace-nowrap py-4 [animation:gmsh-marquee_38s_linear_infinite]"
+        className="flex w-max flex-nowrap items-center gap-10 whitespace-nowrap py-3 [animation:gmsh-marquee_38s_linear_infinite] motion-reduce:[animation:none]"
+        style={
+          direction === "reverse" ? { animationDirection: "reverse" } : undefined
         }
       >
-        {[...items, ...items].map((label, i) => (
+        {[...labels, ...labels].map((label, i) => (
           <div key={i} className="flex items-center gap-10">
             <span className="font-[family-name:var(--font-heading)] text-2xl font-bold uppercase tracking-[0.18em] sm:text-3xl">
               {label}
@@ -53,17 +49,48 @@ export function DndMarquee() {
           </div>
         ))}
       </div>
+    </div>
+  );
+}
 
-      <style jsx global>{`
-        @keyframes gmsh-marquee {
-          from {
-            transform: translateX(0);
+/**
+ * Two stacked "DUNGEONS & DRAGONS" running tapes: top scrolls left, bottom
+ * scrolls right. The contrast band reads as a divider between sections.
+ *
+ * Why an SSR-safe global keyframe?
+ * `<style jsx>` would scope the keyframe name and break the Tailwind
+ * arbitrary `[animation:gmsh-marquee_…]` reference, so we use
+ * `<style jsx global>` to keep the name unscoped.
+ */
+export function DndMarquee() {
+  const prefersReducedMotion = useReducedMotion();
+
+  return (
+    <section
+      aria-label="Dungeons & Dragons"
+      className="relative w-full overflow-hidden border-y border-black/15 bg-[#f6e9d4] text-[#2c0e16]"
+    >
+      <div className="flex flex-col">
+        <MarqueeRow direction="forward" />
+        <div aria-hidden className="h-px bg-black/15" />
+        <MarqueeRow direction="reverse" />
+      </div>
+
+      {/* Without animation when the user prefers reduced motion: the
+          translateX never starts, so nothing scrolls. We still render the
+          row so the section is not empty. */}
+      {prefersReducedMotion ? null : (
+        <style jsx global>{`
+          @keyframes gmsh-marquee {
+            from {
+              transform: translateX(0);
+            }
+            to {
+              transform: translateX(-50%);
+            }
           }
-          to {
-            transform: translateX(-50%);
-          }
-        }
-      `}</style>
+        `}</style>
+      )}
     </section>
   );
 }
