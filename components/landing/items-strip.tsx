@@ -97,13 +97,13 @@ function ItemCard({ item }: { item: Item }) {
  */
 export function ItemsStrip() {
   const prefersReducedMotion = useReducedMotion();
-  const doubled = [...ITEMS, ...ITEMS];
+  // Doubled only for the seamless marquee loop. Reduced-motion users get
+  // the original list since horizontal scroll over duplicates would just
+  // confuse them.
+  const items = prefersReducedMotion ? ITEMS : [...ITEMS, ...ITEMS];
 
   return (
-    <section
-      aria-label="Предметы недели"
-      className="relative w-full overflow-hidden py-12"
-    >
+    <section aria-label="Предметы недели" className="relative w-full py-12">
       <div className="mx-auto mb-7 flex max-w-7xl items-end justify-between px-4 sm:px-6">
         <h2 className="font-[family-name:var(--font-heading)] text-2xl font-bold uppercase tracking-[0.16em] sm:text-3xl">
           Предметы недели
@@ -116,16 +116,28 @@ export function ItemsStrip() {
         </Link>
       </div>
 
+      {/* The animated variant needs `overflow-hidden` on the outer wrapper
+          (so the seam never shows) and `w-max` on the track (so the loop
+          spans both copies). The reduced-motion variant swaps that for a
+          natively scrollable row constrained to the viewport. */}
       <div
         className={
           prefersReducedMotion
-            ? "flex w-max flex-nowrap items-stretch gap-5 overflow-x-auto px-4 sm:px-6"
-            : "group/track flex w-max flex-nowrap items-stretch gap-5 px-4 [animation:gmsh-marquee_55s_linear_infinite] motion-reduce:[animation:none] hover:[animation-play-state:paused] sm:px-6"
+            ? "w-full overflow-x-auto"
+            : "w-full overflow-hidden"
         }
       >
-        {doubled.map((item, i) => (
-          <ItemCard key={`${item.id}-${i}`} item={item} />
-        ))}
+        <div
+          className={
+            prefersReducedMotion
+              ? "flex flex-nowrap items-stretch gap-5 px-4 sm:px-6"
+              : "group/track flex w-max flex-nowrap items-stretch gap-5 px-4 [animation:gmsh-marquee_55s_linear_infinite] motion-reduce:[animation:none] hover:[animation-play-state:paused] sm:px-6"
+          }
+        >
+          {items.map((item, i) => (
+            <ItemCard key={`${item.id}-${i}`} item={item} />
+          ))}
+        </div>
       </div>
     </section>
   );
