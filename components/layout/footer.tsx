@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Send, MessageCircle, Globe, Headphones } from "lucide-react";
-import { FOOTER_LINKS } from "@/lib/constants/site";
+import { FOOTER_LINKS, SITE } from "@/lib/constants/site";
 import { GmLogo } from "@/components/brand/logo";
 
 const SOCIALS = [
@@ -64,7 +64,7 @@ export function Footer() {
             ))}
           </ul>
           <div className="space-y-1 text-xs text-foreground/80">
-            <p>{new Date().getFullYear()} • The GM secret house</p>
+            <p>© {new Date().getFullYear()} {SITE.name}</p>
             <p>info@gm.com</p>
           </div>
         </div>
