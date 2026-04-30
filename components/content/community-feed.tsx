@@ -112,7 +112,7 @@ export function CommunityFeed({ all }: { all: ContentRecord[] }) {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {visible.map((c) => (
-            <ContentCard key={c.id} c={c} highlight={search} />
+            <ContentCard key={c.id} c={c} highlight={search.trim()} />
           ))}
         </div>
       )}

@@ -25,6 +25,7 @@ export function ContentCard({
   const prefersReducedMotion = useReducedMotion();
   const thumb =
     (c.type === "item" && "imageUrl" in c.data && c.data.imageUrl) ||
+    (c.type === "artifact" && "imageUrl" in c.data && c.data.imageUrl) ||
     (c.type === "character" && "portraitUrl" in c.data && c.data.portraitUrl) ||
     TYPE_FALLBACK_IMAGE[c.type];
 
