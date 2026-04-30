@@ -45,30 +45,30 @@ export function HeroSection() {
           initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="relative max-w-2xl"
+          className="relative max-w-xl"
         >
-          <p className="mb-5 text-xs font-semibold uppercase tracking-[0.32em] text-primary/85 sm:text-sm">
+          <p className="mb-4 text-[0.7rem] font-semibold uppercase tracking-[0.36em] text-primary/85 sm:text-xs">
             {t.eyebrow}
           </p>
           <h1
             id="hero-heading"
-            className="font-[family-name:var(--font-heading)] text-[clamp(2.25rem,7vw,4.5rem)] font-bold uppercase leading-[1.08] tracking-[0.01em] [text-wrap:balance]"
+            className="font-[family-name:var(--font-heading)] text-[clamp(1.75rem,4.4vw,3.25rem)] font-bold uppercase leading-[1.1] tracking-[0.005em] [text-wrap:balance]"
           >
             {t.title}
           </h1>
-          <p className="mt-7 max-w-md text-base leading-relaxed text-foreground/80 sm:text-lg [text-wrap:pretty]">
+          <p className="mt-5 max-w-md text-sm leading-relaxed text-foreground/75 sm:text-base [text-wrap:pretty]">
             {t.subtitle}
           </p>
-          <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/register"
-              className="inline-flex items-center justify-center rounded-full bg-foreground px-9 py-3.5 text-[0.78rem] font-semibold uppercase tracking-[0.22em] text-background shadow-[0_10px_30px_-10px_rgba(255,255,255,0.45)] transition-transform hover:-translate-y-0.5"
+              className="inline-flex items-center justify-center rounded-full bg-foreground px-8 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-background shadow-[0_10px_30px_-10px_rgba(255,255,255,0.45)] transition-transform hover:-translate-y-0.5"
             >
               {t.ctaPrimary}
             </Link>
             <Link
               href="/tools"
-              className="inline-flex items-center justify-center rounded-full border border-foreground/35 bg-black/40 px-9 py-3.5 text-[0.78rem] font-semibold uppercase tracking-[0.22em] text-foreground/95 backdrop-blur transition-colors hover:border-foreground/70"
+              className="inline-flex items-center justify-center rounded-full border border-foreground/35 bg-black/40 px-8 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-foreground/95 backdrop-blur transition-colors hover:border-foreground/70"
             >
               {t.ctaSecondary}
             </Link>

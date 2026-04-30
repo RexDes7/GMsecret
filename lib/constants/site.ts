@@ -36,7 +36,6 @@ export const FOOTER_LINKS = [
     items: [
       { href: "/login", label: "Вход" },
       { href: "/register", label: "Регистрация" },
-      { href: "/login", label: "Восстановить пароль" },
       { href: "/library/rules", label: "Правила" },
       { href: "/community", label: "Техническая поддержка" },
     ],

@@ -119,7 +119,7 @@ export function ItemsStrip() {
       <div
         className={
           prefersReducedMotion
-            ? "flex w-max flex-nowrap items-stretch gap-5 px-4 sm:px-6"
+            ? "flex w-max flex-nowrap items-stretch gap-5 overflow-x-auto px-4 sm:px-6"
             : "group/track flex w-max flex-nowrap items-stretch gap-5 px-4 [animation:gmsh-marquee_55s_linear_infinite] motion-reduce:[animation:none] hover:[animation-play-state:paused] sm:px-6"
         }
       >
