@@ -18,7 +18,12 @@ export async function generateMetadata({
 
 export default async function ProfilePage({ params }: { params: Params }) {
   const { username } = await params;
-  const items = SAMPLE_CONTENT.filter((c) => c.authorUsername === username);
+  // Only public content is shown to anonymous visitors. Once NextAuth is
+  // wired up, the profile owner should additionally see their own private
+  // content (server-side session check, task 14.5).
+  const items = SAMPLE_CONTENT.filter(
+    (c) => c.authorUsername === username && c.isPublic
+  );
 
   // For now we treat any author with at least one item as a known user.
   // Without a backend we still render an empty profile if the username
