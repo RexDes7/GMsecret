@@ -63,7 +63,11 @@ function subscribe(cb: () => void) {
   };
 }
 function emit() {
-  cachedRaw = null; // invalidate cache so next read reflects the write
+  // Invalidate both cache slots — when localStorage is cleared the new raw
+  // value is `null`, which would otherwise compare equal to a stale
+  // `cachedRaw` and cause `read()` to return the previous user reference.
+  cached = null;
+  cachedRaw = null;
   for (const cb of listeners) cb();
 }
 
