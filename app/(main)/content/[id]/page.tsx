@@ -29,7 +29,7 @@ export default async function ContentDetailPage({
 }) {
   const { id } = await params;
   const c = SAMPLE_CONTENT.find((x) => x.id === id);
-  if (!c) return notFound();
+  if (!c || !c.isPublic) return notFound();
 
   return (
     <article className="mx-auto w-full max-w-4xl px-4 py-12 sm:px-6">

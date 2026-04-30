@@ -27,48 +27,89 @@ const Ctx = React.createContext<AuthContext>({
 const STORAGE_KEY = "gm-secret-house:session";
 
 /**
+ * External store for the session, backed by localStorage. Using
+ * useSyncExternalStore lets us avoid setting React state inside an effect
+ * (the React 19 lint rule react-hooks/set-state-in-effect) while still
+ * supporting SSR — the server snapshot is `null` and hydration switches to
+ * the persisted user without flicker.
+ */
+
+let cached: SessionUser | null = null;
+let cachedRaw: string | null = null;
+
+function read(): SessionUser | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (raw === cachedRaw) return cached;
+    cachedRaw = raw;
+    cached = raw ? (JSON.parse(raw) as SessionUser) : null;
+    return cached;
+  } catch {
+    return null;
+  }
+}
+
+const listeners = new Set<() => void>();
+function subscribe(cb: () => void) {
+  listeners.add(cb);
+  const onStorage = (e: StorageEvent) => {
+    if (e.key === STORAGE_KEY) cb();
+  };
+  window.addEventListener("storage", onStorage);
+  return () => {
+    listeners.delete(cb);
+    window.removeEventListener("storage", onStorage);
+  };
+}
+function emit() {
+  cachedRaw = null; // invalidate cache so next read reflects the write
+  for (const cb of listeners) cb();
+}
+
+function getServerSnapshot(): SessionUser | null {
+  return null;
+}
+
+/**
  * Lightweight client-side session store. This is a stand-in for NextAuth.js;
  * it persists a "session user" in localStorage so guards/UI can be developed
  * before MongoDB and NextAuth are wired up.
  */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = React.useState<SessionUser | null>(null);
-  const [status, setStatus] = React.useState<AuthContext["status"]>("loading");
+  const user = React.useSyncExternalStore(subscribe, read, getServerSnapshot);
+  // useSyncExternalStore returns the server snapshot during SSR and the very
+  // first hydration commit, then switches to the client snapshot. We mirror
+  // that behaviour here to expose a "loading" status until hydration finishes
+  // — that prevents AuthGuard from redirecting on the transient null state.
+  const hydrated = React.useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false
+  );
 
-  React.useEffect(() => {
-    // Hydrate from localStorage on mount. localStorage isn't available during
-    // SSR, so we must read it in an effect.
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        setUser(JSON.parse(raw) as SessionUser);
-        setStatus("authenticated");
-      } else {
-        setStatus("unauthenticated");
-      }
-    } catch {
-      setStatus("unauthenticated");
-    }
-  }, []);
+  const status: AuthContext["status"] = !hydrated
+    ? "loading"
+    : user
+      ? "authenticated"
+      : "unauthenticated";
 
   const signIn = React.useCallback((next: SessionUser) => {
-    setUser(next);
-    setStatus("authenticated");
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     } catch {
       /* ignore storage failures */
     }
+    emit();
   }, []);
 
   const signOut = React.useCallback(() => {
-    setUser(null);
-    setStatus("unauthenticated");
     try {
       window.localStorage.removeItem(STORAGE_KEY);
     } catch {
       /* ignore */
     }
+    emit();
   }, []);
 
   const value = React.useMemo(
