@@ -4,9 +4,8 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ru } from "@/lib/i18n/ru";
-import { Button } from "@/components/ui/button";
 
 export type HeroSlide = {
   id: string;
@@ -19,22 +18,6 @@ export type HeroSlide = {
 
 const FALLBACK_HEROES: HeroSlide[] = [
   {
-    id: "legolas",
-    name: "Леголас Долины",
-    author: "@elven_ranger",
-    image: "/media/heroes/legolas.png",
-    href: "/community?character=legolas",
-    subtitle: "Эльф-следопыт, лучник долины",
-  },
-  {
-    id: "dwarf",
-    name: "Торгрим Каменный Молот",
-    author: "@runeforger",
-    image: "/media/heroes/dwarf.png",
-    href: "/community?character=dwarf",
-    subtitle: "Дварф-воин, мастер кузнечного дела",
-  },
-  {
     id: "sorceress",
     name: "Селена Полночная",
     author: "@nightweave",
@@ -42,15 +25,37 @@ const FALLBACK_HEROES: HeroSlide[] = [
     href: "/community?character=sorceress",
     subtitle: "Чародейка, повелительница теней",
   },
+  {
+    id: "legolas",
+    name: "Леголас",
+    author: "@elven_ranger",
+    image: "/media/heroes/legolas.png",
+    href: "/community?character=legolas",
+    subtitle: "Эльф-следопыт, лучник долины",
+  },
+  {
+    id: "dwarf",
+    name: "Торгрим",
+    author: "@runeforger",
+    image: "/media/heroes/dwarf.png",
+    href: "/community?character=dwarf",
+    subtitle: "Дварф-воин, мастер кузнечного дела",
+  },
 ];
 
-const ROTATE_MS = 5000;
+const ROTATE_MS = 5500;
+
+function modIndex(i: number, n: number) {
+  return ((i % n) + n) % n;
+}
 
 /**
- * Carousel of featured heroes. Auto-rotates every 5s, pauses on hover/focus,
- * and supports manual prev/next navigation.
+ * Three-up hero spotlight. The center portrait is the active hero and
+ * shows a name pill at the top; the side portraits are dimmed previews of
+ * the previous/next heroes. Auto-rotates every ROTATE_MS, pauses on
+ * hover/focus, and supports manual prev/next + arrow keys.
  *
- * Property: index always satisfies 0 <= index < slides.length.
+ * Property: `index` always satisfies `0 <= index < slides.length`.
  */
 export function HeroesCarousel({
   slides = FALLBACK_HEROES,
@@ -63,11 +68,11 @@ export function HeroesCarousel({
 
   const total = slides.length;
   const next = React.useCallback(
-    () => setIndex((i) => (i + 1) % total),
+    () => setIndex((i) => modIndex(i + 1, total)),
     [total]
   );
   const prev = React.useCallback(
-    () => setIndex((i) => (i - 1 + total) % total),
+    () => setIndex((i) => modIndex(i - 1, total)),
     [total]
   );
 
@@ -77,8 +82,11 @@ export function HeroesCarousel({
     return () => window.clearInterval(id);
   }, [paused, prefersReducedMotion, next, total]);
 
-  const slide = slides[index];
-  if (total === 0 || !slide) return null;
+  if (total === 0) return null;
+
+  const center = slides[modIndex(index, total)]!;
+  const left = slides[modIndex(index - 1, total)]!;
+  const right = slides[modIndex(index + 1, total)]!;
 
   return (
     <section
@@ -90,108 +98,168 @@ export function HeroesCarousel({
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
     >
-      <header className="mb-8 flex items-end justify-between">
-        <h2 className="font-[family-name:var(--font-heading)] text-3xl font-bold sm:text-4xl">
+      <header className="mb-10 flex items-center justify-center">
+        <h2 className="font-[family-name:var(--font-heading)] text-2xl font-bold uppercase tracking-[0.22em] sm:text-3xl">
           {ru.heroes.section}
         </h2>
-        <Button
-          asChild
-          variant="ghost"
-          size="sm"
-          className="hidden sm:inline-flex"
-        >
-          <Link href="/community?type=character">{ru.heroes.cta}</Link>
-        </Button>
       </header>
 
-      <div className="relative grid items-center gap-6 overflow-hidden rounded-2xl border border-border/60 bg-card/40 p-6 md:grid-cols-[1fr_1.2fr]">
-        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-muted/40">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={slide.id}
-              initial={
-                prefersReducedMotion ? false : { opacity: 0, scale: 1.02 }
-              }
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.4 }}
-              className="absolute inset-0"
-            >
-              <Image
-                src={slide.image}
-                alt={slide.name}
-                fill
-                sizes="(min-width: 768px) 35vw, 90vw"
-                className="object-cover"
-                priority={index === 0}
-              />
-            </motion.div>
-          </AnimatePresence>
+      <div className="relative">
+        <div className="grid grid-cols-3 items-center gap-3 sm:gap-5">
+          <HeroCard
+            slide={left}
+            variant="side"
+            onClick={prev}
+            ariaLabel="Предыдущий герой"
+          />
+          <HeroCard
+            slide={center}
+            variant="center"
+            ariaLabel={`Открыть карточку ${center.name}`}
+          />
+          <HeroCard
+            slide={right}
+            variant="side"
+            onClick={next}
+            ariaLabel="Следующий герой"
+          />
         </div>
 
-        <div className="relative flex min-h-[18rem] flex-col gap-4">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={slide.id + "-text"}
-              initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.4 }}
-              className="flex flex-col gap-3"
-            >
-              <p className="text-xs uppercase tracking-[0.2em] text-primary">
-                {String(index + 1).padStart(2, "0")} /
-                {String(total).padStart(2, "0")}
-              </p>
-              <h3 className="font-[family-name:var(--font-heading)] text-3xl font-bold">
-                {slide.name}
-              </h3>
-              <p className="text-sm text-muted-foreground">{slide.subtitle}</p>
-              <p className="text-xs text-muted-foreground/80">
-                автор: {slide.author}
-              </p>
-              <Button asChild size="sm" className="mt-2 self-start">
-                <Link href={slide.href}>Открыть карточку</Link>
-              </Button>
-            </motion.div>
-          </AnimatePresence>
-
-          <div className="mt-auto flex items-center gap-2">
-            <button
-              type="button"
-              aria-label="Предыдущий герой"
-              onClick={prev}
-              className="grid size-10 place-items-center rounded-full border border-border/60 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-            >
-              <ChevronLeft className="size-5" />
-            </button>
-            <button
-              type="button"
-              aria-label="Следующий герой"
-              onClick={next}
-              className="grid size-10 place-items-center rounded-full border border-border/60 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-            >
-              <ChevronRight className="size-5" />
-            </button>
-            <div className="ml-2 flex items-center gap-1.5">
-              {slides.map((s, i) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  aria-label={`Перейти к ${s.name}`}
-                  aria-current={i === index}
-                  onClick={() => setIndex(i)}
-                  className={
-                    i === index
-                      ? "h-1.5 w-6 rounded-full bg-primary transition-all"
-                      : "h-1.5 w-1.5 rounded-full bg-muted transition-all hover:bg-muted-foreground"
-                  }
-                />
-              ))}
-            </div>
-          </div>
+        {/* Big chevron buttons — overlay on the edges. */}
+        <div className="pointer-events-none absolute inset-y-0 -inset-x-2 hidden items-center justify-between sm:flex">
+          <button
+            type="button"
+            aria-label="Предыдущий герой"
+            onClick={prev}
+            className="pointer-events-auto grid size-11 place-items-center rounded-full bg-black/35 text-foreground/70 ring-1 ring-white/10 backdrop-blur transition-colors hover:bg-black/55 hover:text-foreground"
+          >
+            <ChevronLeft className="size-5" />
+          </button>
+          <button
+            type="button"
+            aria-label="Следующий герой"
+            onClick={next}
+            className="pointer-events-auto grid size-11 place-items-center rounded-full bg-black/35 text-foreground/70 ring-1 ring-white/10 backdrop-blur transition-colors hover:bg-black/55 hover:text-foreground"
+          >
+            <ChevronRight className="size-5" />
+          </button>
         </div>
       </div>
+
+      {/* Dots */}
+      <div className="mt-6 flex items-center justify-center gap-2">
+        {slides.map((s, i) => (
+          <button
+            key={s.id}
+            type="button"
+            aria-label={`Перейти к ${s.name}`}
+            aria-current={i === modIndex(index, total)}
+            onClick={() => setIndex(i)}
+            className={
+              i === modIndex(index, total)
+                ? "h-1.5 w-6 rounded-full bg-foreground transition-all"
+                : "h-1.5 w-1.5 rounded-full bg-muted transition-all hover:bg-muted-foreground"
+            }
+          />
+        ))}
+      </div>
+
+      {/* SR-only description of the active hero so screen readers track
+          changes even though the visual UI just shows the portrait. */}
+      <p className="sr-only" aria-live="polite">
+        {center.name}: {center.subtitle}, автор {center.author}.
+      </p>
     </section>
+  );
+}
+
+type HeroCardProps = {
+  slide: HeroSlide;
+  variant: "center" | "side";
+  ariaLabel: string;
+  onClick?: () => void;
+};
+
+function HeroCard({ slide, variant, ariaLabel, onClick }: HeroCardProps) {
+  const prefersReducedMotion = useReducedMotion();
+  const isCenter = variant === "center";
+
+  const inner = (
+    <motion.div
+      key={slide.id + variant}
+      initial={prefersReducedMotion ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+      className={
+        isCenter
+          ? "relative aspect-[3/4] w-full rounded-2xl"
+          : "relative aspect-[3/4] w-full overflow-hidden rounded-2xl"
+      }
+    >
+      <div
+        className={
+          isCenter
+            ? "relative size-full overflow-hidden rounded-2xl ring-2 ring-foreground/15"
+            : "absolute inset-0 overflow-hidden rounded-2xl"
+        }
+      >
+        <Image
+          src={slide.image}
+          alt={slide.name}
+          fill
+          sizes={
+            isCenter
+              ? "(min-width: 768px) 30vw, 50vw"
+              : "(min-width: 768px) 22vw, 25vw"
+          }
+          className={
+            isCenter
+              ? "object-cover"
+              : "object-cover opacity-55 saturate-50 transition-opacity hover:opacity-80"
+          }
+          priority={isCenter}
+        />
+        {/* Side portraits get an inward fade so the focus stays on the
+            center portrait. */}
+        {!isCenter ? (
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-r from-background/45 via-transparent to-background/45"
+          />
+        ) : null}
+      </div>
+
+      {isCenter ? (
+        <div className="absolute inset-x-0 -top-4 flex justify-center">
+          <span className="inline-flex items-center gap-2 rounded-full bg-[#7a1424] px-5 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-foreground shadow-[0_8px_20px_-6px_rgba(220,28,52,0.6)] ring-1 ring-white/15">
+            {slide.name}
+            <span aria-hidden>⚔</span>
+          </span>
+        </div>
+      ) : null}
+    </motion.div>
+  );
+
+  if (isCenter) {
+    return (
+      <Link
+        href={slide.href}
+        aria-label={ariaLabel}
+        className="block focus-visible:outline-none"
+      >
+        {inner}
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      aria-label={ariaLabel}
+      onClick={onClick}
+      className="block w-full cursor-pointer focus-visible:outline-none"
+    >
+      {inner}
+    </button>
   );
 }

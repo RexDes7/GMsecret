@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, LogIn, UserCircle2 } from "lucide-react";
+import { Menu, X, UserCircle2 } from "lucide-react";
 import * as React from "react";
-import { NAV_LINKS, SITE } from "@/lib/constants/site";
+import { NAV_LINKS } from "@/lib/constants/site";
 import { useAuth } from "@/components/providers/auth-provider";
-import { Button } from "@/components/ui/button";
+import { GmLogo } from "@/components/brand/logo";
 import { cn } from "@/lib/utils";
 
 export function Header() {
@@ -21,42 +21,40 @@ export function Header() {
   }, [pathname]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4 sm:px-6">
-        <Link
-          href="/"
-          className="flex items-center gap-2 font-[family-name:var(--font-heading)] text-lg font-bold tracking-wider text-foreground"
-        >
-          <span
-            aria-hidden
-            className="grid size-7 place-items-center rounded-md bg-primary/15 text-primary ring-1 ring-primary/40"
-          >
-            G
-          </span>
-          <span className="hidden sm:inline">{SITE.name}</span>
-          <span className="sm:hidden">{SITE.shortName}</span>
+    <header className="sticky top-0 z-40 border-b border-border/40 bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/65">
+      <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6">
+        <Link href="/" aria-label="GM Secret House — на главную">
+          <GmLogo />
         </Link>
 
-        <nav className="ml-4 hidden items-center gap-1 md:flex">
+        <nav className="ml-6 hidden items-center gap-1 md:flex">
           {NAV_LINKS.map((l) => {
             const active =
-              pathname === l.href ||
-              (l.href !== "/" && pathname.startsWith(l.href));
+              pathname === l.href || pathname.startsWith(`${l.href}/`);
             return (
               <Link
                 key={l.href}
                 href={l.href}
                 className={cn(
-                  "rounded-md px-3 py-1.5 text-sm transition-colors",
+                  "px-3 py-1.5 text-sm font-medium uppercase tracking-[0.18em] transition-colors",
                   active
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
                 )}
               >
                 {l.label}
               </Link>
             );
           })}
+          <Link
+            href="/community"
+            className="ml-2 inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/60 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.2em] text-foreground/90 transition-colors hover:border-primary/60 hover:text-primary"
+          >
+            Неведомый мир?
+            <span aria-hidden className="text-primary">
+              ↗
+            </span>
+          </Link>
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
@@ -64,26 +62,33 @@ export function Header() {
             <>
               <Link
                 href={`/profile/${user.username}`}
-                className="hidden items-center gap-2 rounded-md px-2 py-1 text-sm text-muted-foreground hover:bg-muted hover:text-foreground sm:inline-flex"
+                className="hidden items-center gap-2 rounded-full px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground sm:inline-flex"
               >
                 <UserCircle2 className="size-4" />
                 {user.username}
               </Link>
-              <Button variant="ghost" size="sm" onClick={signOut}>
+              <button
+                type="button"
+                onClick={signOut}
+                className="rounded-full bg-foreground px-5 py-1.5 text-sm font-semibold uppercase tracking-[0.18em] text-background transition-colors hover:bg-foreground/90"
+              >
                 Выйти
-              </Button>
+              </button>
             </>
           ) : (
             <>
-              <Button asChild variant="ghost" size="sm">
-                <Link href="/login">
-                  <LogIn className="size-4" />
-                  Войти
-                </Link>
-              </Button>
-              <Button asChild size="sm" className="hidden sm:inline-flex">
-                <Link href="/register">Регистрация</Link>
-              </Button>
+              <Link
+                href="/register"
+                className="hidden rounded-full px-3 py-1.5 text-sm uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+              >
+                Регистрация
+              </Link>
+              <Link
+                href="/login"
+                className="rounded-full bg-foreground px-5 py-1.5 text-sm font-semibold uppercase tracking-[0.18em] text-background transition-colors hover:bg-foreground/90"
+              >
+                Вход
+              </Link>
             </>
           )}
 
@@ -104,14 +109,13 @@ export function Header() {
           <ul className="flex flex-col gap-1">
             {NAV_LINKS.map((l) => {
               const active =
-                pathname === l.href ||
-                (l.href !== "/" && pathname.startsWith(l.href));
+                pathname === l.href || pathname.startsWith(`${l.href}/`);
               return (
                 <li key={l.href}>
                   <Link
                     href={l.href}
                     className={cn(
-                      "block rounded-md px-3 py-2 text-sm",
+                      "block rounded-md px-3 py-2 text-sm uppercase tracking-[0.18em]",
                       active
                         ? "bg-primary/10 text-primary"
                         : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -122,6 +126,17 @@ export function Header() {
                 </li>
               );
             })}
+            <li>
+              <Link
+                href="/community"
+                className="mt-2 inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/60 px-4 py-2 text-xs uppercase tracking-[0.2em]"
+              >
+                Неведомый мир?
+                <span aria-hidden className="text-primary">
+                  ↗
+                </span>
+              </Link>
+            </li>
           </ul>
         </nav>
       ) : null}

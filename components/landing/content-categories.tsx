@@ -40,17 +40,12 @@ export function ContentCategories() {
   return (
     <section
       aria-labelledby="categories-heading"
-      className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6"
+      className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6"
     >
-      <header className="mb-8 flex items-end justify-between">
-        <h2
-          id="categories-heading"
-          className="font-[family-name:var(--font-heading)] text-3xl font-bold sm:text-4xl"
-        >
-          Категории контента
-        </h2>
-      </header>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <h2 id="categories-heading" className="sr-only">
+        Категории контента
+      </h2>
+      <div className="grid gap-3 sm:grid-cols-2">
         {items.map(({ key, ...rest }) => (
           <ContentCategoryCard key={key} {...rest} />
         ))}
