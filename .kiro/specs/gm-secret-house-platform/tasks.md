@@ -13,8 +13,8 @@
 - [x] 1.4 Set up project folder structure according to design document
 - [x] 1.5 Configure TypeScript with strict mode
 - [x] 1.6 Set up ESLint and Prettier
-- [-] 1.7 Initialize Git repository and create .gitignore
-- [ ] 1.8 Create environment variables template (.env.example)
+- [x] 1.7 Initialize Git repository and create .gitignore
+- [x] 1.8 Create environment variables template (.env.example)
 
 ### Task 2: Database Setup
 
@@ -51,14 +51,14 @@
 **Design:** Layout Components
 
 - [ ] 4.1 Install shadcn/ui base components (Button, Input, Card, etc.)
-- [ ] 4.2 Create root layout with providers (Auth, Theme)
-- [ ] 4.3 Implement Header component with navigation
-- [ ] 4.4 Implement Footer component
-- [ ] 4.5 Create responsive Navigation component
-- [ ] 4.6 Implement AuthGuard component for protected routes
-- [ ] 4.7 Create ErrorBoundary component
-- [ ] 4.8 Add custom fonts (Dudka family)
-- [ ] 4.9 Configure dark fantasy theme colors (crimson accents)
+- [x] 4.2 Create root layout with providers (Auth, Theme)
+- [x] 4.3 Implement Header component with navigation
+- [x] 4.4 Implement Footer component
+- [x] 4.5 Create responsive Navigation component
+- [x] 4.6 Implement AuthGuard component for protected routes
+- [x] 4.7 Create ErrorBoundary component
+- [x] 4.8 Add custom fonts (Dudka family)
+- [x] 4.9 Configure dark fantasy theme colors (crimson accents)
 
 ## Phase 2: Landing Page and Public Features
 
@@ -67,14 +67,14 @@
 **Requirements:** Req 9 (Landing Page Display)
 **Design:** HeroSection Component
 
-- [ ] 5.1 Create landing page route (app/page.tsx)
-- [ ] 5.2 Implement HeroSection component with video background
-- [ ] 5.3 Add video autoplay, loop, and mute functionality
-- [ ] 5.4 Create dark gradient overlay
-- [ ] 5.5 Add hero title and subtitle (Russian text)
-- [ ] 5.6 Implement CTA buttons with routing
-- [ ] 5.7 Optimize video file (max 10MB, compressed)
-- [ ] 5.8 Add lazy loading for below-fold content
+- [x] 5.1 Create landing page route (app/page.tsx)
+- [x] 5.2 Implement HeroSection component with video background
+- [x] 5.3 Add video autoplay, loop, and mute functionality
+- [x] 5.4 Create dark gradient overlay
+- [x] 5.5 Add hero title and subtitle (Russian text)
+- [x] 5.6 Implement CTA buttons with routing
+- [x] 5.7 Optimize video file (max 10MB, compressed)
+- [x] 5.8 Add lazy loading for below-fold content
 - [ ] 5.9 Test performance (2s load time on 3G)
 
 ### Task 6: Landing Page - Feature Blocks
@@ -82,36 +82,36 @@
 **Requirements:** Req 9 (Landing Page Display)
 **Design:** Landing Page Components
 
-- [ ] 6.1 Create FeatureBlock component
-- [ ] 6.2 Implement four feature blocks with numbered indicators (01-04)
-- [ ] 6.3 Add Russian text for each feature
-- [ ] 6.4 Add Framer Motion animations on scroll
-- [ ] 6.5 Make blocks responsive for mobile/tablet/desktop
+- [x] 6.1 Create FeatureBlock component
+- [x] 6.2 Implement four feature blocks with numbered indicators (01-04)
+- [x] 6.3 Add Russian text for each feature
+- [x] 6.4 Add Framer Motion animations on scroll
+- [x] 6.5 Make blocks responsive for mobile/tablet/desktop
 
 ### Task 7: Landing Page - Content Categories
 
 **Requirements:** Req 9 (Landing Page Display)
 **Design:** Content Category Cards
 
-- [ ] 7.1 Create ContentCategoryCard component
-- [ ] 7.2 Implement four category cards (Equipment, Spells, Artifacts, Bestiary)
-- [ ] 7.3 Add category images from Media folder
-- [ ] 7.4 Implement click navigation to filtered community feed
-- [ ] 7.5 Add hover effects with Framer Motion
+- [x] 7.1 Create ContentCategoryCard component
+- [x] 7.2 Implement four category cards (Equipment, Spells, Artifacts, Bestiary)
+- [x] 7.3 Add category images from Media folder
+- [x] 7.4 Implement click navigation to filtered community feed
+- [x] 7.5 Add hover effects with Framer Motion
 
 ### Task 8: Landing Page - Heroes Carousel
 
 **Requirements:** Req 17 (Heroes Carousel)
 **Design:** HeroesCarousel Component
 
-- [ ] 8.1 Create HeroesCarousel component
-- [ ] 8.2 Implement auto-rotation (5-second interval)
-- [ ] 8.3 Add manual navigation (prev/next buttons)
-- [ ] 8.4 Implement pause on hover
+- [x] 8.1 Create HeroesCarousel component
+- [x] 8.2 Implement auto-rotation (5-second interval)
+- [x] 8.3 Add manual navigation (prev/next buttons)
+- [x] 8.4 Implement pause on hover
 - [ ] 8.5 Fetch featured characters from database
-- [ ] 8.6 Display character portraits from Media folder
-- [ ] 8.7 Add character name and author username
-- [ ] 8.8 Implement click navigation to character detail
+- [x] 8.6 Display character portraits from Media folder
+- [x] 8.7 Add character name and author username
+- [x] 8.8 Implement click navigation to character detail
 - [ ] 8.9 Write property-based test for carousel index bounds (Property 7)
 
 ## Phase 3: Authentication UI
@@ -121,29 +121,29 @@
 **Requirements:** Req 1 (User Authentication), Req 22 (Form Validation)
 **Design:** RegisterForm Component
 
-- [ ] 9.1 Create registration page route (app/(auth)/register/page.tsx)
-- [ ] 9.2 Implement RegisterForm component with React Hook Form
-- [ ] 9.3 Create Zod schema for registration validation
-- [ ] 9.4 Add form fields (email, username, password, confirmPassword)
-- [ ] 9.5 Implement real-time validation with 300ms debounce
-- [ ] 9.6 Add field-specific error messages in Russian
-- [ ] 9.7 Implement form submission with loading state
+- [x] 9.1 Create registration page route (app/(auth)/register/page.tsx)
+- [x] 9.2 Implement RegisterForm component with React Hook Form
+- [x] 9.3 Create Zod schema for registration validation
+- [x] 9.4 Add form fields (email, username, password, confirmPassword)
+- [x] 9.5 Implement real-time validation with 300ms debounce
+- [x] 9.6 Add field-specific error messages in Russian
+- [x] 9.7 Implement form submission with loading state
 - [ ] 9.8 Handle duplicate email/username errors
-- [ ] 9.9 Redirect to profile on successful registration
+- [x] 9.9 Redirect to profile on successful registration
 
 ### Task 10: Login Page
 
 **Requirements:** Req 1 (User Authentication), Req 22 (Form Validation)
 **Design:** LoginForm Component
 
-- [ ] 10.1 Create login page route (app/(auth)/login/page.tsx)
-- [ ] 10.2 Implement LoginForm component with React Hook Form
-- [ ] 10.3 Create Zod schema for login validation
-- [ ] 10.4 Add form fields (email, password)
-- [ ] 10.5 Implement form submission with NextAuth signIn
-- [ ] 10.6 Handle authentication errors in Russian
-- [ ] 10.7 Add "Remember me" functionality
-- [ ] 10.8 Redirect to profile on successful login
+- [x] 10.1 Create login page route (app/(auth)/login/page.tsx)
+- [x] 10.2 Implement LoginForm component with React Hook Form
+- [x] 10.3 Create Zod schema for login validation
+- [x] 10.4 Add form fields (email, password)
+- [x] 10.5 Implement form submission with NextAuth signIn
+- [x] 10.6 Handle authentication errors in Russian
+- [x] 10.7 Add "Remember me" functionality
+- [x] 10.8 Redirect to profile on successful login
 
 ## Phase 4: Content System
 
@@ -152,13 +152,13 @@
 **Requirements:** Req 15 (Content Schema Validation)
 **Design:** Content Schemas
 
-- [ ] 11.1 Create base Content schema with Zod
-- [ ] 11.2 Create Character schema (name, race, class, level, abilityScores, etc.)
-- [ ] 11.3 Create Map schema (gridSize, cells, markers)
-- [ ] 11.4 Create Item schema (name, type, rarity, weight, cost)
-- [ ] 11.5 Create Spell schema
-- [ ] 11.6 Create Artifact schema
-- [ ] 11.7 Create Creature schema
+- [x] 11.1 Create base Content schema with Zod
+- [x] 11.2 Create Character schema (name, race, class, level, abilityScores, etc.)
+- [x] 11.3 Create Map schema (gridSize, cells, markers)
+- [x] 11.4 Create Item schema (name, type, rarity, weight, cost)
+- [x] 11.5 Create Spell schema
+- [x] 11.6 Create Artifact schema
+- [x] 11.7 Create Creature schema
 - [ ] 11.8 Write property-based test for schema validation completeness (Property 6)
 
 ### Task 12: Content API Routes
@@ -181,11 +181,11 @@
 **Requirements:** Req 20 (Content Parsing)
 **Design:** Parser Service
 
-- [ ] 13.1 Create ContentService class (lib/services/content.service.ts)
-- [ ] 13.2 Implement createContent method
-- [ ] 13.3 Implement getContent method with filtering
-- [ ] 13.4 Implement updateContent method
-- [ ] 13.5 Implement deleteContent method
+- [x] 13.1 Create ContentService class (lib/services/content.service.ts)
+- [x] 13.2 Implement createContent method
+- [x] 13.3 Implement getContent method with filtering
+- [x] 13.4 Implement updateContent method
+- [x] 13.5 Implement deleteContent method
 - [ ] 13.6 Implement Parser for each content type
 - [ ] 13.7 Implement Pretty_Printer for each content type
 - [ ] 13.8 Write property-based test for parser/pretty-printer round-trip (Property 8)
@@ -197,14 +197,14 @@
 **Requirements:** Req 2 (User Profile Management)
 **Design:** Profile Components
 
-- [ ] 14.1 Create profile page route (app/(main)/profile/[username]/page.tsx)
-- [ ] 14.2 Implement profile data fetching
-- [ ] 14.3 Display user avatar, username, and creation date
-- [ ] 14.4 Display user's public content (for guests)
-- [ ] 14.5 Display user's public + private content (for owner)
-- [ ] 14.6 Implement content grid layout
-- [ ] 14.7 Add "Edit Profile" button for owner
-- [ ] 14.8 Handle user not found (404)
+- [x] 14.1 Create profile page route (app/(main)/profile/[username]/page.tsx)
+- [x] 14.2 Implement profile data fetching
+- [x] 14.3 Display user avatar, username, and creation date
+- [x] 14.4 Display user's public content (for guests)
+- [x] 14.5 Display user's public + private content (for owner)
+- [x] 14.6 Implement content grid layout
+- [x] 14.7 Add "Edit Profile" button for owner
+- [x] 14.8 Handle user not found (404)
 
 ### Task 15: Profile Editing
 
@@ -240,48 +240,48 @@
 **Requirements:** Req 4 (Character Builder Tool)
 **Design:** CharacterBuilder Component
 
-- [ ] 17.1 Create character builder route (app/(main)/tools/characters/page.tsx)
-- [ ] 17.2 Implement CharacterBuilder component
-- [ ] 17.3 Add form fields (name, race, class, level)
-- [ ] 17.4 Implement ability scores input (6 scores)
-- [ ] 17.5 Calculate and display ability modifiers in real-time
-- [ ] 17.6 Add skills, equipment, spells, background fields
-- [ ] 17.7 Implement character portrait upload
-- [ ] 17.8 Validate ability scores (1-30) and level (1-20)
-- [ ] 17.9 Implement save functionality (create/update content)
-- [ ] 17.10 Implement load existing character
-- [ ] 17.11 Write property-based test for ability modifier calculation (Property 3)
+- [x] 17.1 Create character builder route (app/(main)/tools/characters/page.tsx)
+- [x] 17.2 Implement CharacterBuilder component
+- [x] 17.3 Add form fields (name, race, class, level)
+- [x] 17.4 Implement ability scores input (6 scores)
+- [x] 17.5 Calculate and display ability modifiers in real-time
+- [x] 17.6 Add skills, equipment, spells, background fields
+- [x] 17.7 Implement character portrait upload
+- [x] 17.8 Validate ability scores (1-30) and level (1-20)
+- [x] 17.9 Implement save functionality (create/update content)
+- [x] 17.10 Implement load existing character
+- [x] 17.11 Write property-based test for ability modifier calculation (Property 3)
 
 ### Task 18: Map Builder
 
 **Requirements:** Req 5 (Map Builder Tool)
 **Design:** MapBuilder Component
 
-- [ ] 18.1 Create map builder route (app/(main)/tools/maps/page.tsx)
-- [ ] 18.2 Implement MapBuilder component with canvas
-- [ ] 18.3 Create grid system (10x10 to 100x100)
-- [ ] 18.4 Implement terrain placement (floor, wall, door, water, etc.)
-- [ ] 18.5 Implement marker system (position, label, icon)
-- [ ] 18.6 Add zoom and pan functionality
-- [ ] 18.7 Implement save functionality
-- [ ] 18.8 Implement load existing map
-- [ ] 18.9 Add export to PNG functionality (up to 4096x4096)
-- [ ] 18.10 Write property-based test for map coordinate bounds (Property 4)
+- [x] 18.1 Create map builder route (app/(main)/tools/maps/page.tsx)
+- [x] 18.2 Implement MapBuilder component with canvas
+- [x] 18.3 Create grid system (10x10 to 100x100)
+- [x] 18.4 Implement terrain placement (floor, wall, door, water, etc.)
+- [x] 18.5 Implement marker system (position, label, icon)
+- [x] 18.6 Add zoom and pan functionality
+- [x] 18.7 Implement save functionality
+- [x] 18.8 Implement load existing map
+- [x] 18.9 Add export to PNG functionality (up to 4096x4096)
+- [x] 18.10 Write property-based test for map coordinate bounds (Property 4)
 
 ### Task 19: Item Builder
 
 **Requirements:** Req 6 (Item Builder Tool)
 **Design:** ItemBuilder Component
 
-- [ ] 19.1 Create item builder route (app/(main)/tools/items/page.tsx)
-- [ ] 19.2 Implement ItemBuilder component
-- [ ] 19.3 Add form fields (name, type, rarity, description)
-- [ ] 19.4 Add properties, weight, cost fields
-- [ ] 19.5 Add magical effects textarea
-- [ ] 19.6 Implement item image upload
-- [ ] 19.7 Validate weight and cost (non-negative)
-- [ ] 19.8 Implement save functionality
-- [ ] 19.9 Implement load existing item
+- [x] 19.1 Create item builder route (app/(main)/tools/items/page.tsx)
+- [x] 19.2 Implement ItemBuilder component
+- [x] 19.3 Add form fields (name, type, rarity, description)
+- [x] 19.4 Add properties, weight, cost fields
+- [x] 19.5 Add magical effects textarea
+- [x] 19.6 Implement item image upload
+- [x] 19.7 Validate weight and cost (non-negative)
+- [x] 19.8 Implement save functionality
+- [x] 19.9 Implement load existing item
 
 ## Phase 7: Community Features
 
@@ -290,41 +290,41 @@
 **Requirements:** Req 7 (Community Feed), Req 8 (Content Search)
 **Design:** CommunityFeed Component
 
-- [ ] 20.1 Create community page route (app/(main)/community/page.tsx)
-- [ ] 20.2 Implement CommunityFeed component
-- [ ] 20.3 Fetch public content with pagination (20 items/page)
-- [ ] 20.4 Implement infinite scroll
-- [ ] 20.5 Display ContentCard for each item
-- [ ] 20.6 Add content type filter (all, character, map, item, etc.)
-- [ ] 20.7 Implement search functionality
-- [ ] 20.8 Add search query highlighting
-- [ ] 20.9 Sort by creation date (newest first)
-- [ ] 20.10 Write property-based test for pagination invariant (Property 5)
+- [x] 20.1 Create community page route (app/(main)/community/page.tsx)
+- [x] 20.2 Implement CommunityFeed component
+- [x] 20.3 Fetch public content with pagination (20 items/page)
+- [x] 20.4 Implement infinite scroll
+- [x] 20.5 Display ContentCard for each item
+- [x] 20.6 Add content type filter (all, character, map, item, etc.)
+- [x] 20.7 Implement search functionality
+- [x] 20.8 Add search query highlighting
+- [x] 20.9 Sort by creation date (newest first)
+- [x] 20.10 Write property-based test for pagination invariant (Property 5)
 
 ### Task 21: Content Card Component
 
 **Requirements:** Req 7 (Community Feed)
 **Design:** ContentCard Component
 
-- [ ] 21.1 Create ContentCard component
-- [ ] 21.2 Display thumbnail, title, description
-- [ ] 21.3 Display author username and creation date
-- [ ] 21.4 Add click handler for navigation
-- [ ] 21.5 Implement lazy loading for images
-- [ ] 21.6 Add hover effects with Framer Motion
-- [ ] 21.7 Show content type badge
+- [x] 21.1 Create ContentCard component
+- [x] 21.2 Display thumbnail, title, description
+- [x] 21.3 Display author username and creation date
+- [x] 21.4 Add click handler for navigation
+- [x] 21.5 Implement lazy loading for images
+- [x] 21.6 Add hover effects with Framer Motion
+- [x] 21.7 Show content type badge
 
 ### Task 22: Content Detail View
 
 **Requirements:** Req 7 (Community Feed)
 **Design:** ContentDetailView Component
 
-- [ ] 22.1 Create content detail route (app/(main)/content/[id]/page.tsx)
-- [ ] 22.2 Fetch content by ID
-- [ ] 22.3 Display full content data based on type
-- [ ] 22.4 Show author information
+- [x] 22.1 Create content detail route (app/(main)/content/[id]/page.tsx)
+- [x] 22.2 Fetch content by ID
+- [x] 22.3 Display full content data based on type
+- [x] 22.4 Show author information
 - [ ] 22.5 Add edit/delete buttons for owner
-- [ ] 22.6 Implement privacy check (404 for private content)
+- [x] 22.6 Implement privacy check (404 for private content)
 - [ ] 22.7 Add view counter increment
 
 ## Phase 8: Admin Panel
@@ -334,11 +334,11 @@
 **Requirements:** Req 10 (Admin Panel)
 **Design:** Admin Components
 
-- [ ] 23.1 Create admin route (app/admin/page.tsx)
-- [ ] 23.2 Implement admin access middleware
-- [ ] 23.3 Create admin dashboard layout
-- [ ] 23.4 Add user management section
-- [ ] 23.5 Add content moderation section
+- [x] 23.1 Create admin route (app/admin/page.tsx)
+- [x] 23.2 Implement admin access middleware
+- [x] 23.3 Create admin dashboard layout
+- [x] 23.4 Add user management section
+- [x] 23.5 Add content moderation section
 - [ ] 23.6 Display admin action logs
 
 ### Task 24: User Management
@@ -372,12 +372,12 @@
 **Requirements:** Req 11 (Library and Knowledge Base)
 **Design:** Library Components
 
-- [ ] 26.1 Create library route (app/(main)/library/page.tsx)
-- [ ] 26.2 Create library data structure (JSON or markdown files)
-- [ ] 26.3 Organize content into categories (Rules, Classes, Races, etc.)
-- [ ] 26.4 Implement category navigation
-- [ ] 26.5 Create article list view
-- [ ] 26.6 Create article detail view with markdown support
+- [x] 26.1 Create library route (app/(main)/library/page.tsx)
+- [x] 26.2 Create library data structure (JSON or markdown files)
+- [x] 26.3 Organize content into categories (Rules, Classes, Races, etc.)
+- [x] 26.4 Implement category navigation
+- [x] 26.5 Create article list view
+- [x] 26.6 Create article detail view with markdown support
 - [ ] 26.7 Implement search with autocomplete
 - [ ] 26.8 Optimize search performance (<300ms)
 
@@ -436,9 +436,9 @@
 **Requirements:** Req 13 (Performance and Optimization)
 **Design:** Performance Strategy
 
-- [ ] 31.1 Implement code splitting for routes
-- [ ] 31.2 Optimize images with Next.js Image component
-- [ ] 31.3 Add lazy loading for below-fold content
+- [x] 31.1 Implement code splitting for routes
+- [x] 31.2 Optimize images with Next.js Image component
+- [x] 31.3 Add lazy loading for below-fold content
 - [ ] 31.4 Implement caching strategy for static assets
 - [ ] 31.5 Optimize database queries with proper indexes
 - [ ] 31.6 Implement cursor-based pagination for large datasets
@@ -465,13 +465,13 @@
 **Requirements:** Req 24 (Internationalization)
 **Design:** Translation System
 
-- [ ] 33.1 Create translation file structure
-- [ ] 33.2 Extract all UI strings to translation files
-- [ ] 33.3 Implement Russian translations (primary)
-- [ ] 33.4 Implement English translations (secondary)
-- [ ] 33.5 Create translation utility functions
+- [x] 33.1 Create translation file structure
+- [x] 33.2 Extract all UI strings to translation files
+- [x] 33.3 Implement Russian translations (primary)
+- [x] 33.4 Implement English translations (secondary)
+- [x] 33.5 Create translation utility functions
 - [ ] 33.6 Add language selector to user settings
-- [ ] 33.7 Test fallback behavior for missing keys
+- [x] 33.7 Test fallback behavior for missing keys
 
 ## Phase 13: Deployment
 
@@ -496,9 +496,9 @@
 **Requirements:** Developer documentation
 **Design:** Documentation
 
-- [ ] 35.1 Write README.md with project overview
-- [ ] 35.2 Document environment variables
-- [ ] 35.3 Write setup instructions for local development
+- [x] 35.1 Write README.md with project overview
+- [x] 35.2 Document environment variables
+- [x] 35.3 Write setup instructions for local development
 - [ ] 35.4 Document API routes and interfaces
 - [ ] 35.5 Create architecture diagrams
 - [ ] 35.6 Write contributing guidelines
