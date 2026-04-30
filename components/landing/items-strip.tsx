@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Sword,
   ShieldHalf,
@@ -46,13 +47,13 @@ export function ItemsStrip() {
       <ul className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
         {ITEMS.map(({ icon: Icon, label, href }) => (
           <li key={label}>
-            <a
+            <Link
               href={href}
               aria-label={label}
               className="grid size-12 place-items-center rounded-md bg-[linear-gradient(180deg,rgba(120,18,32,0.55)_0%,rgba(60,8,16,0.85)_100%)] text-foreground/90 ring-1 ring-inset ring-white/5 transition-transform hover:-translate-y-0.5 hover:ring-primary/60 sm:size-14"
             >
               <Icon className="size-6 sm:size-7" />
-            </a>
+            </Link>
           </li>
         ))}
       </ul>

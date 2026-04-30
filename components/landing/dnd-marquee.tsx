@@ -54,7 +54,7 @@ export function DndMarquee() {
         ))}
       </div>
 
-      <style jsx>{`
+      <style jsx global>{`
         @keyframes gmsh-marquee {
           from {
             transform: translateX(0);
