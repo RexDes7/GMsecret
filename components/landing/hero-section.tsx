@@ -27,15 +27,19 @@ export function HeroSection() {
         preload="metadata"
         aria-hidden
       />
-      {/* Three stacked overlays:
-          - Radial vignette to feather any black letterbox bars into the
-            video without a hard seam
-          - Left-side dark fade so the text stays legible without
+      {/* Stacked overlays:
+          - Hard black side fades to mask any letterbox seam between the
+            video and the surrounding background
+          - Soft left-side fade so the headline stays legible without
             tinting the warrior on the right
           - Bottom fade-to-background so the next section blends in */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,transparent_45%,rgba(0,0,0,0.55)_78%,rgba(0,0,0,0.95)_100%)]"
+        className="pointer-events-none absolute inset-y-0 left-0 -z-10 w-24 bg-[linear-gradient(90deg,#000_0%,#000_50%,transparent_100%)] sm:w-32"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-y-0 right-0 -z-10 w-24 bg-[linear-gradient(270deg,#000_0%,#000_50%,transparent_100%)] sm:w-32"
       />
       <div
         aria-hidden
