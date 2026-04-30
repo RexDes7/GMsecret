@@ -31,17 +31,21 @@ function MarqueeRow({
   return (
     <div className="overflow-hidden">
       <div
-        className="flex w-max flex-nowrap items-center gap-10 whitespace-nowrap py-3 [animation:gmsh-marquee_38s_linear_infinite] motion-reduce:[animation:none]"
+        className="flex w-max flex-nowrap items-center whitespace-nowrap py-3 [animation:gmsh-marquee_38s_linear_infinite] motion-reduce:[animation:none]"
         style={
           direction === "reverse" ? { animationDirection: "reverse" } : undefined
         }
       >
+        {/* Per-item margin instead of flex `gap` so the total width is an
+            exact multiple of one copy: total = 2 * (label + shield + 2*gap).
+            With `gap`, the trailing gap is dropped and `-50%` lands half a
+            gap short of the duplicate's start, causing a visible jump. */}
         {[...labels, ...labels].map((label, i) => (
-          <div key={i} className="flex items-center gap-10">
-            <span className="font-[family-name:var(--font-heading)] text-2xl font-bold uppercase tracking-[0.18em] sm:text-3xl">
+          <div key={i} className="flex items-center">
+            <span className="mr-10 font-[family-name:var(--font-heading)] text-2xl font-bold uppercase tracking-[0.18em] sm:text-3xl">
               {label}
             </span>
-            <DndShield />
+            <DndShield className="mr-10 size-7" />
           </div>
         ))}
       </div>

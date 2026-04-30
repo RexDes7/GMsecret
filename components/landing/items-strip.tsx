@@ -71,7 +71,7 @@ function ItemCard({ item }: { item: Item }) {
     <Link
       href={href}
       aria-label={`${name} — автор @${author}`}
-      className="group relative flex w-44 shrink-0 flex-col gap-2 sm:w-48"
+      className="group relative mr-5 flex w-44 shrink-0 flex-col gap-2 sm:w-48"
     >
       <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-[radial-gradient(circle_at_30%_25%,rgba(220,28,52,0.45)_0%,rgba(70,8,16,0.95)_55%,rgba(20,4,8,1)_100%)] ring-1 ring-inset ring-white/10 transition-transform duration-300 group-hover:-translate-y-1 group-hover:ring-primary/60">
         <Icon className="absolute inset-0 m-auto size-14 text-foreground/95 drop-shadow-[0_4px_18px_rgba(220,28,52,0.55)]" />
@@ -130,8 +130,8 @@ export function ItemsStrip() {
         <div
           className={
             prefersReducedMotion
-              ? "flex flex-nowrap items-stretch gap-5 px-4 sm:px-6"
-              : "group/track flex w-max flex-nowrap items-stretch gap-5 px-4 [animation:gmsh-marquee_55s_linear_infinite] motion-reduce:[animation:none] hover:[animation-play-state:paused] sm:px-6"
+              ? "flex flex-nowrap items-stretch px-4 sm:px-6"
+              : "group/track flex w-max flex-nowrap items-stretch px-4 [animation:gmsh-marquee_55s_linear_infinite] motion-reduce:[animation:none] hover:[animation-play-state:paused] sm:px-6"
           }
         >
           {items.map((item, i) => (
