@@ -62,11 +62,13 @@
   --font-sans:
     var(--font-dudka, ui-sans-serif), system-ui, -apple-system, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, sans-serif;
-  /* Per-glyph fallback chain: Cinzel covers Latin (no Cyrillic glyphs),
-     Dudka covers Cyrillic. Both must be listed explicitly so the browser
-     falls through *per glyph* — `var(font, fallback)` only triggers if
-     the variable itself is undefined, not if the font lacks the glyph. */
-  --font-heading: var(--font-cinzel), var(--font-dudka), serif;
+  /* Dudka first because it covers both Cyrillic AND Latin with consistent
+     metrics. Cinzel is kept as a secondary fallback for stylistic Latin
+     accents in places where a serif feels right (e.g. the marquee tape).
+     We can't rely on `var(--font-cinzel), var(--font-dudka)` because
+     Next.js silently injects a Times-based "Cinzel Fallback" with Cyrillic
+     coverage that would steal Russian glyphs before Dudka gets a turn. */
+  --font-heading: var(--font-dudka), var(--font-cinzel), sans-serif;
   --font-mono:
     var(--font-geist-mono, ui-monospace), SFMono-Regular, Menlo, monospace;
 
