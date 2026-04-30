@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { ru } from "@/lib/i18n/ru";
@@ -13,37 +14,22 @@ export function HeroSection() {
       aria-labelledby="hero-heading"
       className="relative isolate -mt-20 flex min-h-screen w-full flex-col justify-center overflow-hidden sm:-mt-24"
     >
-      {/* Background video covers the whole hero. We render it behind
-          everything; on `prefers-reduced-motion` it stays paused on the
-          poster frame so the still image still reads as the warrior. */}
-      <video
-        className="absolute inset-0 -z-20 size-full object-cover"
-        src="/media/hero.mp4"
-        poster="/media/hero-poster.jpg"
-        autoPlay={!prefersReducedMotion}
-        muted
-        loop
-        playsInline
-        preload="metadata"
-        aria-hidden
+      {/* Static hero artwork — replaces the temporary video. Cover the
+          whole section so the warrior stays anchored on the right. */}
+      <Image
+        src="/media/hero.jpg"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="-z-20 object-cover"
       />
-      {/* Stacked overlays:
-          - Hard black side fades to mask any letterbox seam between the
-            video and the surrounding background
-          - Soft left-side fade so the headline stays legible without
-            tinting the warrior on the right
-          - Bottom fade-to-background so the next section blends in */}
+      {/* Soft left-side fade so the headline stays legible without
+          tinting the warrior on the right, plus a bottom fade-to-bg
+          so the next section blends in. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-y-0 left-0 -z-10 w-24 bg-[linear-gradient(90deg,#000_0%,#000_50%,transparent_100%)] sm:w-32"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-y-0 right-0 -z-10 w-24 bg-[linear-gradient(270deg,#000_0%,#000_50%,transparent_100%)] sm:w-32"
-      />
-      <div
-        aria-hidden
-        className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(8,3,5,0.85)_0%,rgba(8,3,5,0.55)_30%,rgba(8,3,5,0.05)_55%,rgba(8,3,5,0)_70%)]"
+        className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(8,3,5,0.75)_0%,rgba(8,3,5,0.4)_35%,rgba(8,3,5,0.05)_60%,rgba(8,3,5,0)_75%)]"
       />
       <div
         aria-hidden
