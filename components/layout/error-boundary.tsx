@@ -29,7 +29,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
         <p className="text-sm text-muted-foreground">
           Произошла непредвиденная ошибка. Попробуйте обновить страницу.
         </p>
-        {this.state.error?.message ? (
+        {process.env.NODE_ENV !== "production" && this.state.error?.message ? (
           <pre className="max-w-full overflow-auto rounded-md bg-muted/40 px-3 py-2 text-left text-xs text-muted-foreground">
             {this.state.error.message}
           </pre>
