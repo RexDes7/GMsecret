@@ -18,9 +18,9 @@ export function CtaSection() {
         <div className="mt-10 flex justify-center">
           <Link
             href="/register"
-            // `pl-[…+0.24em]` compensates for the trailing
-            // letter-spacing so the label is optically centred.
-            className="inline-flex items-center justify-center rounded-xl bg-foreground px-12 py-3.5 pl-[calc(3rem+0.24em)] text-sm font-bold uppercase tracking-[0.24em] text-background shadow-lg transition-transform hover:-translate-y-0.5"
+            // `leading-none` + the `pl-[…+0.24em]` shim keep the
+            // uppercase label centred both horizontally and vertically.
+            className="inline-flex items-center justify-center rounded-xl bg-foreground px-12 py-4 pl-[calc(3rem+0.24em)] text-sm font-bold uppercase leading-none tracking-[0.24em] text-background shadow-lg transition-transform hover:-translate-y-0.5"
           >
             {ru.cta.primary}
           </Link>

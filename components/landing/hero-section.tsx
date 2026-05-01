@@ -87,16 +87,17 @@ export function HeroSection() {
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/register"
-              // `pl-[0.24em]` compensates for the trailing
-              // letter-spacing of the last glyph so the label
-              // appears optically centred inside the button.
-              className="inline-flex items-center justify-center rounded-xl bg-foreground px-8 py-3 pl-[calc(2rem+0.24em)] text-[0.72rem] font-bold uppercase tracking-[0.24em] text-background shadow-[0_10px_30px_-10px_rgba(255,255,255,0.45)] transition-transform hover:-translate-y-0.5"
+              // `leading-none` collapses the line-box so the
+              // uppercase label sits centred vertically; the
+              // `pl-[…+0.24em]` shim covers the trailing letter-
+              // spacing on the right so the text reads centred.
+              className="inline-flex items-center justify-center rounded-xl bg-foreground px-8 py-3.5 pl-[calc(2rem+0.24em)] text-[0.72rem] font-bold uppercase leading-none tracking-[0.24em] text-background shadow-[0_10px_30px_-10px_rgba(255,255,255,0.45)] transition-transform hover:-translate-y-0.5"
             >
               {t.ctaPrimary}
             </Link>
             <Link
               href="/tools"
-              className="inline-flex items-center justify-center rounded-xl border border-foreground/35 bg-black/40 px-8 py-3 pl-[calc(2rem+0.24em)] text-[0.72rem] font-bold uppercase tracking-[0.24em] text-foreground/95 backdrop-blur transition-colors hover:border-foreground/70"
+              className="inline-flex items-center justify-center rounded-xl border border-foreground/35 bg-black/40 px-8 py-3.5 pl-[calc(2rem+0.24em)] text-[0.72rem] font-bold uppercase leading-none tracking-[0.24em] text-foreground/95 backdrop-blur transition-colors hover:border-foreground/70"
             >
               {t.ctaSecondary}
             </Link>
