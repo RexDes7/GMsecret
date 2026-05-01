@@ -131,7 +131,13 @@ export function ItemsStrip() {
           className={
             prefersReducedMotion
               ? "flex flex-nowrap items-stretch px-4 sm:px-6"
-              : "group/track flex w-max flex-nowrap items-stretch px-4 [animation:gmsh-marquee_55s_linear_infinite] motion-reduce:[animation:none] hover:[animation-play-state:paused] sm:px-6"
+              // No horizontal padding on the animated track: the
+              // `gmsh-marquee` keyframe translates by exactly -50% of
+              // the element width, so any asymmetric padding would make
+              // the second copy land a few px off the first and produce
+              // a visible seam at the loop reset. Cards bring their own
+              // breathing room via `mr-5`.
+              : "group/track flex w-max flex-nowrap items-stretch [animation:gmsh-marquee_55s_linear_infinite] motion-reduce:[animation:none] hover:[animation-play-state:paused]"
           }
         >
           {items.map((item, i) => (
