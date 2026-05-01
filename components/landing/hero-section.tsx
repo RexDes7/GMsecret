@@ -24,14 +24,16 @@ export function HeroSection() {
           // ?v=2 busts old browser caches that picked up an earlier
           // re-encode of this file. Bump on any new mp4.
           src="/media/hero.mp4?v=2"
-          autoPlay
+          // Honour `prefers-reduced-motion`: don't autoplay and don't
+          // preload the file at all — those users only ever see the
+          // still poster, so downloading the mp4 wastes bandwidth and
+          // battery.
+          autoPlay={!prefersReducedMotion}
           muted
           playsInline
-          preload="auto"
+          preload={prefersReducedMotion ? "none" : "auto"}
           aria-hidden
           onEnded={() => setEnded(true)}
-          // For users who prefer reduced motion, skip straight to the
-          // still poster — never start the video.
           className="pointer-events-none h-full w-full object-cover"
           style={{
             opacity: ended || prefersReducedMotion ? 0 : 1,
