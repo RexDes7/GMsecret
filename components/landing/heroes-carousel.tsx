@@ -116,8 +116,11 @@ export function HeroesCarousel({
       <div className="relative">
         {/* Sliding viewport. We keep an invisible sizer grid in the normal
             flow so the absolute-positioned animated rows always have a
-            stable height, and clip exiting/entering rows with overflow. */}
-        <div className="relative overflow-hidden">
+            stable height, and clip exiting/entering rows on the x-axis
+            only (`overflow-x-clip`) so the centered name pill that sits
+            above the active card and any soft drop shadows below stay
+            fully visible. */}
+        <div className="relative overflow-x-clip overflow-y-visible py-6">
           <div
             aria-hidden
             className="invisible grid grid-cols-3 items-center gap-3 sm:gap-5"
