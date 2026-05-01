@@ -36,7 +36,7 @@ export function ContentCategoryCard({
       transition={{ duration: 0.4 }}
       whileHover={prefersReducedMotion ? undefined : { y: -4 }}
       className={cn(
-        "group relative isolate overflow-hidden rounded-2xl bg-card/40",
+        "group relative isolate overflow-hidden bg-card/40",
         className
       )}
     >
