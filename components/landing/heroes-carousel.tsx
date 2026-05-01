@@ -67,6 +67,14 @@ export function HeroesCarousel({
   const [direction, setDirection] = React.useState(1);
   const [paused, setPaused] = React.useState(false);
 
+  // Mirror `index` into a ref so callbacks can read the latest value
+  // synchronously without violating React's pure-updater contract (i.e.
+  // we never trigger `setDirection` from inside a `setIndex` updater).
+  const indexRef = React.useRef(index);
+  React.useEffect(() => {
+    indexRef.current = index;
+  }, [index]);
+
   const total = slides.length;
   const next = React.useCallback(() => {
     setDirection(1);
@@ -77,11 +85,10 @@ export function HeroesCarousel({
     setIndex((i) => modIndex(i - 1, total));
   }, [total]);
   const goTo = React.useCallback(
-    (target: number) =>
-      setIndex((i) => {
-        setDirection(target >= i ? 1 : -1);
-        return modIndex(target, total);
-      }),
+    (target: number) => {
+      setDirection(target >= indexRef.current ? 1 : -1);
+      setIndex(modIndex(target, total));
+    },
     [total]
   );
 
