@@ -82,7 +82,7 @@ export function Header() {
               <button
                 type="button"
                 onClick={signOut}
-                className="rounded-lg bg-foreground px-5 py-2 text-xs font-bold uppercase tracking-[0.18em] text-background transition-colors hover:bg-foreground/90"
+                className="rounded-lg bg-foreground px-5 py-2 pl-[calc(1.25rem+0.18em)] text-xs font-bold uppercase tracking-[0.18em] text-background transition-colors hover:bg-foreground/90"
               >
                 Выйти
               </button>
@@ -97,7 +97,7 @@ export function Header() {
               </Link>
               <Link
                 href="/login"
-                className="rounded-lg bg-foreground px-5 py-2 text-xs font-bold uppercase tracking-[0.22em] text-background transition-colors hover:bg-foreground/90"
+                className="rounded-lg bg-foreground px-5 py-2 pl-[calc(1.25rem+0.22em)] text-xs font-bold uppercase tracking-[0.22em] text-background transition-colors hover:bg-foreground/90"
               >
                 Вход
               </Link>
