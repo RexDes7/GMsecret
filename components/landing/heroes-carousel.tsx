@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ru } from "@/lib/i18n/ru";
 
 export type HeroSlide = {
@@ -64,15 +64,24 @@ export function HeroesCarousel({
 }) {
   const prefersReducedMotion = useReducedMotion();
   const [index, setIndex] = React.useState(0);
+  const [direction, setDirection] = React.useState(1);
   const [paused, setPaused] = React.useState(false);
 
   const total = slides.length;
-  const next = React.useCallback(
-    () => setIndex((i) => modIndex(i + 1, total)),
-    [total]
-  );
-  const prev = React.useCallback(
-    () => setIndex((i) => modIndex(i - 1, total)),
+  const next = React.useCallback(() => {
+    setDirection(1);
+    setIndex((i) => modIndex(i + 1, total));
+  }, [total]);
+  const prev = React.useCallback(() => {
+    setDirection(-1);
+    setIndex((i) => modIndex(i - 1, total));
+  }, [total]);
+  const goTo = React.useCallback(
+    (target: number) =>
+      setIndex((i) => {
+        setDirection(target >= i ? 1 : -1);
+        return modIndex(target, total);
+      }),
     [total]
   );
 
@@ -105,28 +114,65 @@ export function HeroesCarousel({
       </header>
 
       <div className="relative">
-        <div className="grid grid-cols-3 items-center gap-3 sm:gap-5">
-          <HeroCard
-            slide={left}
-            variant="side"
-            onClick={prev}
-            ariaLabel="Предыдущий герой"
-          />
-          <HeroCard
-            slide={center}
-            variant="center"
-            ariaLabel={`Открыть карточку ${center.name}`}
-          />
-          <HeroCard
-            slide={right}
-            variant="side"
-            onClick={next}
-            ariaLabel="Следующий герой"
-          />
+        {/* Sliding viewport. We keep an invisible sizer grid in the normal
+            flow so the absolute-positioned animated rows always have a
+            stable height, and clip exiting/entering rows with overflow. */}
+        <div className="relative overflow-hidden">
+          <div
+            aria-hidden
+            className="invisible grid grid-cols-3 items-center gap-3 sm:gap-5"
+          >
+            <div className="aspect-[3/4]" />
+            <div className="aspect-[3/4]" />
+            <div className="aspect-[3/4]" />
+          </div>
+          <AnimatePresence initial={false} custom={direction} mode="sync">
+            <motion.div
+              key={index}
+              custom={direction}
+              variants={{
+                enter: (d: number) => ({
+                  x: d > 0 ? "100%" : "-100%",
+                  opacity: 0,
+                }),
+                center: { x: 0, opacity: 1 },
+                exit: (d: number) => ({
+                  x: d > 0 ? "-100%" : "100%",
+                  opacity: 0,
+                }),
+              }}
+              initial={prefersReducedMotion ? false : "enter"}
+              animate="center"
+              exit={prefersReducedMotion ? undefined : "exit"}
+              transition={{
+                x: { type: "spring", stiffness: 220, damping: 30 },
+                opacity: { duration: 0.25 },
+              }}
+              className="absolute inset-0 grid grid-cols-3 items-center gap-3 sm:gap-5"
+            >
+              <HeroCard
+                slide={left}
+                variant="side"
+                onClick={prev}
+                ariaLabel="Предыдущий герой"
+              />
+              <HeroCard
+                slide={center}
+                variant="center"
+                ariaLabel={`Открыть карточку ${center.name}`}
+              />
+              <HeroCard
+                slide={right}
+                variant="side"
+                onClick={next}
+                ariaLabel="Следующий герой"
+              />
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         {/* Big chevron buttons — overlay on the edges. */}
-        <div className="pointer-events-none absolute inset-y-0 -inset-x-2 hidden items-center justify-between sm:flex">
+        <div className="pointer-events-none absolute inset-y-0 -inset-x-2 z-10 hidden items-center justify-between sm:flex">
           <button
             type="button"
             aria-label="Предыдущий герой"
@@ -154,7 +200,7 @@ export function HeroesCarousel({
             type="button"
             aria-label={`Перейти к ${s.name}`}
             aria-current={i === modIndex(index, total)}
-            onClick={() => setIndex(i)}
+            onClick={() => goTo(i)}
             className={
               i === modIndex(index, total)
                 ? "h-1.5 w-6 rounded-full bg-foreground transition-all"
