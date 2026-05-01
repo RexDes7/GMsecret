@@ -24,6 +24,9 @@ export function HeroSection() {
           // ?v=2 busts old browser caches that picked up an earlier
           // re-encode of this file. Bump on any new mp4.
           src="/media/hero.mp4?v=2"
+          // Same image is shown as `poster` so the hero is never
+          // a blank rectangle before the first video frame decodes.
+          poster="/media/hero.jpg"
           // Honour `prefers-reduced-motion`: don't autoplay and don't
           // preload the file at all — those users only ever see the
           // still poster, so downloading the mp4 wastes bandwidth and
