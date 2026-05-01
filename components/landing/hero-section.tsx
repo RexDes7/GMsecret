@@ -1,5 +1,7 @@
 "use client";
 
+import * as React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { ru } from "@/lib/i18n/ru";
@@ -7,28 +9,48 @@ import { ru } from "@/lib/i18n/ru";
 export function HeroSection() {
   const prefersReducedMotion = useReducedMotion();
   const t = ru.hero;
+  const [ended, setEnded] = React.useState(false);
 
   return (
     <section
       aria-labelledby="hero-heading"
       className="relative isolate -mt-20 flex min-h-screen w-full flex-col justify-center overflow-hidden sm:-mt-24"
     >
-      {/* Background hero loop. Autoplays muted in a continuous loop; no
-          scroll binding. The mp4 ships with `playsInline` so iOS doesn't
-          take it fullscreen, and `preload="auto"` lets us start painting
-          frames as soon as the first chunk lands. */}
-      <video
-        // ?v=2 busts old browser caches that picked up the earlier
-        // 5-second scrub re-encode of this file. Bump on any new mp4.
-        src="/media/hero.mp4?v=2"
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-20 h-full w-full object-cover"
-      />
+      {/* Hero artwork. The mp4 plays once on page load, then `onEnded`
+          swaps in the still poster — same composition as the last
+          frame, so the user sees the warrior freeze in place. */}
+      <div className="absolute inset-0 -z-20">
+        <video
+          // ?v=2 busts old browser caches that picked up an earlier
+          // re-encode of this file. Bump on any new mp4.
+          src="/media/hero.mp4?v=2"
+          autoPlay
+          muted
+          playsInline
+          preload="auto"
+          aria-hidden
+          onEnded={() => setEnded(true)}
+          // For users who prefer reduced motion, skip straight to the
+          // still poster — never start the video.
+          className="pointer-events-none h-full w-full object-cover"
+          style={{
+            opacity: ended || prefersReducedMotion ? 0 : 1,
+            transition: "opacity 400ms ease-out",
+          }}
+        />
+        <Image
+          src="/media/hero.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+          style={{
+            opacity: ended || prefersReducedMotion ? 1 : 0,
+            transition: "opacity 400ms ease-out",
+          }}
+        />
+      </div>
       {/* Soft left-side fade so the headline stays legible without
           tinting the warrior on the right, plus a bottom fade-to-bg
           so the next section blends in. */}
