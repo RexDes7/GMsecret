@@ -18,7 +18,9 @@ export function HeroSection() {
           take it fullscreen, and `preload="auto"` lets us start painting
           frames as soon as the first chunk lands. */}
       <video
-        src="/media/hero.mp4"
+        // ?v=2 busts old browser caches that picked up the earlier
+        // 5-second scrub re-encode of this file. Bump on any new mp4.
+        src="/media/hero.mp4?v=2"
         autoPlay
         muted
         loop
