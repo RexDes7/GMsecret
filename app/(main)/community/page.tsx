@@ -1,12 +1,20 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { CommunityFeed } from "@/components/content/community-feed";
-import { SAMPLE_CONTENT } from "@/lib/data/sample-content";
+import { contentRepository } from "@/lib/db";
 import { ru } from "@/lib/i18n/ru";
 
 export const metadata: Metadata = { title: ru.community.title };
+export const dynamic = "force-dynamic";
 
-export default function CommunityPage() {
+export default async function CommunityPage() {
+  // SSR initial page of public content. The client component takes it from
+  // here for filtering / search / pagination; when users post new content
+  // it will refresh on next navigation.
+  const initial = await contentRepository().list({
+    onlyPublic: true,
+    limit: 100,
+  });
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6">
       <header className="mb-8">
@@ -20,7 +28,7 @@ export default function CommunityPage() {
           <p className="text-sm text-muted-foreground">{ru.common.loading}</p>
         }
       >
-        <CommunityFeed all={SAMPLE_CONTENT} />
+        <CommunityFeed all={initial.items} />
       </Suspense>
     </div>
   );

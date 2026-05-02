@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X, UserCircle2 } from "lucide-react";
 import * as React from "react";
@@ -76,8 +77,19 @@ export function Header() {
                 href={`/profile/${user.username}`}
                 className="hidden items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-foreground/85 hover:bg-white/5 hover:text-foreground sm:inline-flex"
               >
-                <UserCircle2 className="size-4" />
-                {user.username}
+                {user.avatarUrl ? (
+                  <Image
+                    src={user.avatarUrl}
+                    alt=""
+                    width={20}
+                    height={20}
+                    className="size-5 rounded-full object-cover"
+                    unoptimized
+                  />
+                ) : (
+                  <UserCircle2 className="size-4" />
+                )}
+                {user.displayName || user.username}
               </Link>
               <button
                 type="button"

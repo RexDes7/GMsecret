@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { loginSchema, type LoginInput } from "@/lib/schemas/auth";
 import { ru } from "@/lib/i18n/ru";
 import { useAuth } from "@/components/providers/auth-provider";
+import { UserClient } from "@/lib/services/user-client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -38,15 +39,33 @@ export function LoginForm() {
     setSubmitting(true);
     setErrors({});
     try {
-      await new Promise((r) => setTimeout(r, 250));
       const username = parsed.data.email.split("@")[0] || "player";
-      signIn({
+      const session = {
         id: username,
         email: parsed.data.email,
         username,
-        role: username === "admin" ? "admin" : "user",
-      });
-      router.replace(`/profile/${username}`);
+        role: username === "admin" ? ("admin" as const) : ("user" as const),
+      };
+      signIn(session);
+      try {
+        // Pull fresh profile fields from the server so the header/avatar
+        // reflect any edits made on another device as soon as the user
+        // signs back in.
+        const profile = await UserClient.me(session);
+        signIn({
+          ...session,
+          role: profile.role,
+          displayName: profile.displayName,
+          bio: profile.bio,
+          avatarUrl: profile.avatarUrl,
+        });
+      } catch {
+        /* ignore — auto-create will happen on next GET */
+      }
+      const redirect =
+        new URLSearchParams(window.location.search).get("redirect") ??
+        `/profile/${username}`;
+      router.replace(redirect);
     } catch {
       setErrors({ form: ru.auth.errors.invalidCredentials });
     } finally {

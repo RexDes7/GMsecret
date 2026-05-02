@@ -7,7 +7,8 @@ import {
   type MapDataT,
   type MapTerrain,
 } from "@/lib/schemas/content";
-import { ContentService } from "@/lib/services/content.service";
+import { useRouter } from "next/navigation";
+import { ContentClient } from "@/lib/services/content-client";
 import { useAuth } from "@/components/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,6 +46,8 @@ function makeGrid(
 
 export function MapBuilder() {
   const { user } = useAuth();
+  const router = useRouter();
+  const [submitting, setSubmitting] = React.useState(false);
   const [width, setWidth] = React.useState(20);
   const [height, setHeight] = React.useState(20);
   const [cells, setCells] = React.useState<MapTerrain[][]>(() =>
@@ -107,7 +110,7 @@ export function MapBuilder() {
     }, "image/png");
   }
 
-  function save(e: React.FormEvent) {
+  async function save(e: React.FormEvent) {
     e.preventDefault();
     const data: MapDataT = { width, height, cells, markers: [] };
     const parsed = MapData.safeParse(data);
@@ -122,21 +125,29 @@ export function MapBuilder() {
         JSON.stringify({ title, data })
       );
       setSavedId("draft");
+      router.push("/login?redirect=/tools/maps");
       return;
     }
-    const r = ContentService.create(
-      {
-        title: title || "Карта",
-        description: "",
-        isPublic: false,
-        tags: [],
-        type: "map",
-        data: parsed.data,
-      },
-      user.id,
-      user.username
-    );
-    setSavedId(r.id);
+    setSubmitting(true);
+    try {
+      const r = await ContentClient.create(
+        {
+          title: title || "Карта",
+          description: "",
+          isPublic: false,
+          tags: [],
+          type: "map",
+          data: parsed.data,
+        },
+        user
+      );
+      setSavedId(r.id);
+      window.localStorage.removeItem("gmsh:map-draft");
+    } catch (err) {
+      setError((err as Error).message || "unknown");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -220,8 +231,12 @@ export function MapBuilder() {
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          <Button type="submit" className="w-full glow-primary">
-            Сохранить карту
+          <Button
+            type="submit"
+            className="w-full glow-primary"
+            disabled={submitting}
+          >
+            {submitting ? "Сохраняем…" : "Сохранить карту"}
           </Button>
           <Button type="button" variant="outline" onClick={exportPng}>
             Экспорт в PNG

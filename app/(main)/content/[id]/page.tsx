@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { SAMPLE_CONTENT } from "@/lib/data/sample-content";
+import type { ContentRecord } from "@/lib/schemas/content";
+import { contentRepository } from "@/lib/db";
 import { CONTENT_TYPE_LABEL_RU } from "@/components/content/labels";
 import {
   ABILITY_KEYS,
@@ -12,13 +13,15 @@ import {
 
 type Params = Promise<{ id: string }>;
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: {
   params: Params;
 }): Promise<Metadata> {
   const { id } = await params;
-  const c = SAMPLE_CONTENT.find((x) => x.id === id);
+  const c = await contentRepository().get(id);
   return { title: c?.title ?? "Не найдено" };
 }
 
@@ -28,7 +31,7 @@ export default async function ContentDetailPage({
   params: Params;
 }) {
   const { id } = await params;
-  const c = SAMPLE_CONTENT.find((x) => x.id === id);
+  const c = await contentRepository().get(id);
   if (!c || !c.isPublic) return notFound();
 
   return (
@@ -92,7 +95,7 @@ export default async function ContentDetailPage({
 function CharacterView({
   data,
 }: {
-  data: Extract<(typeof SAMPLE_CONTENT)[number], { type: "character" }>["data"];
+  data: Extract<ContentRecord, { type: "character" }>["data"];
 }) {
   return (
     <div className="space-y-6">
@@ -146,7 +149,7 @@ function CharacterView({
 function ItemView({
   data,
 }: {
-  data: Extract<(typeof SAMPLE_CONTENT)[number], { type: "item" }>["data"];
+  data: Extract<ContentRecord, { type: "item" }>["data"];
 }) {
   return (
     <div className="space-y-3 text-sm">
@@ -167,7 +170,7 @@ function ItemView({
 function SpellView({
   data,
 }: {
-  data: Extract<(typeof SAMPLE_CONTENT)[number], { type: "spell" }>["data"];
+  data: Extract<ContentRecord, { type: "spell" }>["data"];
 }) {
   return (
     <div className="space-y-3 text-sm">
@@ -187,7 +190,7 @@ function SpellView({
 function ArtifactView({
   data,
 }: {
-  data: Extract<(typeof SAMPLE_CONTENT)[number], { type: "artifact" }>["data"];
+  data: Extract<ContentRecord, { type: "artifact" }>["data"];
 }) {
   return (
     <div className="space-y-3 text-sm">
@@ -220,7 +223,7 @@ function ArtifactView({
 function CreatureView({
   data,
 }: {
-  data: Extract<(typeof SAMPLE_CONTENT)[number], { type: "creature" }>["data"];
+  data: Extract<ContentRecord, { type: "creature" }>["data"];
 }) {
   return (
     <div className="space-y-3 text-sm">

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { registerSchema, type RegisterInput } from "@/lib/schemas/auth";
 import { ru } from "@/lib/i18n/ru";
 import { useAuth } from "@/components/providers/auth-provider";
+import { UserClient } from "@/lib/services/user-client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -67,14 +68,30 @@ export function RegisterForm() {
     setSubmitting(true);
     setErrors({});
     try {
-      // Backend not yet implemented (tasks 2/3). Mock a successful sign-up.
-      await new Promise((r) => setTimeout(r, 300));
-      signIn({
+      // Username is used as the user id until a real auth backend issues
+      // stable ids — this keeps everything coherent across the
+      // client/server boundary.
+      const session = {
         id: parsed.data.username,
         email: parsed.data.email,
         username: parsed.data.username,
-        role: "user",
-      });
+        role: "user" as const,
+      };
+      signIn(session);
+      // Materialise the profile on the server. If it fails we still let the
+      // user through (they'll retry on next profile read) — shouldn't block
+      // the happy path of "signed up, redirected to profile".
+      try {
+        const profile = await UserClient.ensure(session, parsed.data.email);
+        signIn({
+          ...session,
+          displayName: profile.displayName,
+          bio: profile.bio,
+          avatarUrl: profile.avatarUrl,
+        });
+      } catch {
+        /* ignore — profile will be auto-created on first /api/users/me GET */
+      }
       router.replace(`/profile/${parsed.data.username}`);
     } catch {
       setErrors({ form: ru.auth.errors.generic });
