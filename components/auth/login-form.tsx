@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { loginSchema, type LoginInput } from "@/lib/schemas/auth";
 import { ru } from "@/lib/i18n/ru";
 import { useAuth } from "@/components/providers/auth-provider";
+import { safeRedirect } from "@/lib/auth/safe-redirect";
 import { UserClient } from "@/lib/services/user-client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -62,10 +63,8 @@ export function LoginForm() {
       } catch {
         /* ignore — auto-create will happen on next GET */
       }
-      const redirect =
-        new URLSearchParams(window.location.search).get("redirect") ??
-        `/profile/${username}`;
-      router.replace(redirect);
+      const raw = new URLSearchParams(window.location.search).get("redirect");
+      router.replace(safeRedirect(raw, `/profile/${username}`));
     } catch {
       setErrors({ form: ru.auth.errors.invalidCredentials });
     } finally {

@@ -9,16 +9,20 @@ import { readSession, requireSession } from "@/lib/auth/session";
 // define a meaningful partial there. This accepts any subset of the
 // top-level fields and delegates the real validation to the full
 // `ContentRecordSchema.parse(merged)` call inside the repository.
-const ContentPatchSchema = z
-  .object({
-    title: z.string().min(1).max(120).optional(),
-    description: z.string().max(2000).optional(),
-    isPublic: z.boolean().optional(),
-    tags: z.array(z.string().max(40)).max(16).optional(),
-    featured: z.boolean().optional(),
-    data: z.unknown().optional(),
-  })
-  .passthrough();
+// IMPORTANT: Do NOT add `.passthrough()`. The default `strip` mode drops
+// unknown keys so an authenticated author can't sneak fields like
+// `authorId`, `id`, `views`, or `createdAt` through `{ ...existing, ...patch }`
+// in the repository and overwrite protected record fields.
+const ContentPatchSchema = z.object({
+  title: z.string().min(1).max(120).optional(),
+  description: z.string().max(2000).optional(),
+  isPublic: z.boolean().optional(),
+  tags: z.array(z.string().max(40)).max(16).optional(),
+  // `featured` is intentionally NOT part of this schema — it's an admin-only
+  // promotion handled via a separate endpoint. A user can't pin their own
+  // record to the landing page.
+  data: z.unknown().optional(),
+});
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
