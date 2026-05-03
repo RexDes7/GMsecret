@@ -42,6 +42,16 @@ export const ContentClient = {
     return apiFetch(`/api/content${toQuery(args)}`, { user });
   },
 
+  async get(
+    id: string,
+    user?: SessionUser | null
+  ): Promise<ContentRecord> {
+    return apiFetch<ContentRecord>(
+      `/api/content/${encodeURIComponent(id)}`,
+      { user }
+    );
+  },
+
   async create(
     input: ContentInput,
     user: SessionUser
