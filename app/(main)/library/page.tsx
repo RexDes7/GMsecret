@@ -1,6 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Sparkles, Sword, Users, BookOpen, ScrollText, Flame } from "lucide-react";
+import {
+  Sparkles,
+  Sword,
+  Users,
+  BookOpen,
+  ScrollText,
+  Flame,
+  Shield,
+  Skull,
+} from "lucide-react";
 import { ru } from "@/lib/i18n/ru";
 import { LIBRARY_CATEGORIES } from "@/lib/data/library";
 
@@ -16,6 +25,13 @@ const REFERENCE_CATALOGUES: {
   icon: React.ComponentType<{ className?: string }>;
   ready: boolean;
 }[] = [
+  {
+    slug: "classes",
+    title: "Классы",
+    summary: "Воин, маг, жрец и другие — особенности, архетипы и снаряжение.",
+    icon: Shield,
+    ready: true,
+  },
   {
     slug: "spells",
     title: "Заклинания",
@@ -49,6 +65,13 @@ const REFERENCE_CATALOGUES: {
     title: "Предыстории",
     summary: "Жизнь до приключений: умения, снаряжение, особенности.",
     icon: ScrollText,
+    ready: true,
+  },
+  {
+    slug: "bestiary",
+    title: "Бестиарий",
+    summary: "Существа: характеристики, действия, опасность.",
+    icon: Skull,
     ready: true,
   },
 ];
