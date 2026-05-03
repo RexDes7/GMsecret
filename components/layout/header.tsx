@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X, UserCircle2 } from "lucide-react";
 import * as React from "react";
@@ -78,13 +77,16 @@ export function Header() {
                 className="hidden items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-foreground/85 hover:bg-white/5 hover:text-foreground sm:inline-flex"
               >
                 {user.avatarUrl ? (
-                  <Image
+                  // User-provided avatar URLs come from arbitrary hosts, so
+                  // we serve them with a plain <img> instead of next/image
+                  // (which requires hostnames to be allow-listed).
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
                     src={user.avatarUrl}
                     alt=""
                     width={20}
                     height={20}
                     className="size-5 rounded-full object-cover"
-                    unoptimized
                   />
                 ) : (
                   <UserCircle2 className="size-4" />

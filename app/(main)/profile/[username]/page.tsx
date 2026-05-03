@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ContentCard } from "@/components/content/content-card";
 import { CONTENT_TYPE_LABEL_RU } from "@/components/content/labels";
@@ -58,12 +57,14 @@ export default async function ProfilePage({ params }: { params: Params }) {
       <header className="mb-10 flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           {avatar ? (
-            <Image
+            // Plain <img> — user-provided avatar URLs come from arbitrary
+            // hosts that we don't want to allow-list in next.config.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
               src={avatar}
               alt={`Аватар @${username}`}
               width={72}
               height={72}
-              unoptimized
               className="size-[72px] rounded-full object-cover ring-1 ring-primary/40"
             />
           ) : (

@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/providers/auth-provider";
@@ -89,13 +88,14 @@ export function ProfileEditForm() {
       <section className="rounded-xl border border-border/60 bg-card/40 p-5">
         <div className="flex items-center gap-4">
           {avatarPreview ? (
-            <Image
+            // Plain <img> — user URLs from arbitrary hosts.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
               src={avatarPreview}
               alt=""
               width={72}
               height={72}
               className="size-[72px] rounded-full object-cover ring-1 ring-primary/40"
-              unoptimized
             />
           ) : (
             <div className="grid size-[72px] place-items-center rounded-full bg-primary/15 text-2xl font-bold text-primary ring-1 ring-primary/40">
