@@ -71,6 +71,15 @@ export async function PATCH(req: Request, { params }: { params: Params }) {
   } catch (e) {
     if ((e as Error).message === "forbidden")
       return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    // The repository runs the full ContentRecordSchema.parse() against the
+    // merged record, which can throw a ZodError when, e.g., a client sends
+    // item-shaped `data` for a character record. Surface that as 400.
+    if (e instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "invalid_input", issues: e.issues },
+        { status: 400 }
+      );
+    }
     throw e;
   }
 }

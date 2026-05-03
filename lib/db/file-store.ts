@@ -23,16 +23,18 @@ async function withLock<T>(name: string, fn: () => Promise<T>): Promise<T> {
   const prev = locks.get(name) ?? Promise.resolve();
   let release!: () => void;
   const next = new Promise<void>((r) => (release = r));
-  locks.set(
-    name,
-    prev.then(() => next)
-  );
+  // Capture the chained promise we actually store so the cleanup below
+  // can compare against the same reference. `prev.then(...)` returns a
+  // distinct Promise from `next`, so comparing against `next` always
+  // failed and the Map kept growing.
+  const chained = prev.then(() => next);
+  locks.set(name, chained);
   try {
     await prev;
     return await fn();
   } finally {
     release();
-    if (locks.get(name) === next) locks.delete(name);
+    if (locks.get(name) === chained) locks.delete(name);
   }
 }
 
