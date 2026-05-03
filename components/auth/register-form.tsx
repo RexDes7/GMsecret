@@ -85,6 +85,11 @@ export function RegisterForm() {
         const profile = await UserClient.ensure(session, parsed.data.email);
         signIn({
           ...session,
+          // Honour the server-side role: if this username is already an admin
+          // (the repository's upsert never downgrades), keep them admin in the
+          // client session too. Otherwise re-registering an existing admin
+          // username would silently demote them in headers/UI.
+          role: profile.role,
           displayName: profile.displayName,
           bio: profile.bio,
           avatarUrl: profile.avatarUrl,
