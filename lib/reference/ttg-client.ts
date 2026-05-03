@@ -193,21 +193,5 @@ export async function getDetail<T = TtgDetail>(
   }
 }
 
-// ───────────────────────────────────────────── Markup helpers
-
-/**
- * ttg.club embeds rich-text "tags" inside descriptions, e.g.
- *   "{@i курсив}", "{@b жирный}", "{@dice 2к6}", "{@damage 8}",
- *   "{@spell огненный шар|spell:fireball-phb}",
- *   "{@glossary заклинание|url:spell-phb}".
- *
- * We strip the wrapper and keep the human-readable text; future iterations
- * can render them as proper components.
- */
-export function stripTtgMarkup(text: string): string {
-  // Match {@token text|target}. Take just the visible text.
-  return text.replace(
-    /\{@([a-zA-Z]+)\s+([^|}]+)(?:\|[^}]*)?\}/g,
-    (_, _tag, content) => content
-  );
-}
+// Re-export markup helpers for convenience.
+export { stripTtgMarkup, excerpt, flattenToText } from "./ttg-rich";

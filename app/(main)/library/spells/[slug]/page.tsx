@@ -3,9 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   getDetail,
-  stripTtgMarkup,
   type TtgSpellDetail,
 } from "@/lib/reference/ttg-client";
+import { RichDescription } from "@/components/reference/rich-description";
 
 type Params = Promise<{ slug: string }>;
 
@@ -74,24 +74,17 @@ export default async function SpellDetailPage({
         </DescItem>
       </dl>
 
-      {s.description?.length ? (
-        <div className="mt-6 space-y-3 text-base leading-relaxed">
-          {s.description.map((p, i) => (
-            <p key={i}>{stripTtgMarkup(p)}</p>
-          ))}
-        </div>
-      ) : null}
+      <RichDescription
+        content={s.description}
+        className="mt-6 space-y-3 text-base leading-relaxed"
+      />
 
       {s.upper?.length ? (
-        <div className="mt-6 rounded-xl border border-primary/40 bg-primary/5 p-4">
+        <div className="mt-6 rounded-xl border border-primary/40 bg-primary/5 p-4 text-sm">
           <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-primary">
             На более высоких уровнях
           </p>
-          {s.upper.map((p, i) => (
-            <p key={i} className="text-sm">
-              {stripTtgMarkup(p)}
-            </p>
-          ))}
+          <RichDescription content={s.upper} className="space-y-1" />
         </div>
       ) : null}
 

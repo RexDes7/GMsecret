@@ -28,28 +28,28 @@ const REFERENCE_CATALOGUES: {
     title: "Магические предметы",
     summary: "Артефакты, оружие и снаряжение с особыми свойствами.",
     icon: Sword,
-    ready: false,
+    ready: true,
   },
   {
     slug: "species",
     title: "Виды и расы",
     summary: "Особенности рас, языки, бонусы характеристик и подвиды.",
     icon: Users,
-    ready: false,
+    ready: true,
   },
   {
     slug: "feats",
     title: "Черты",
     summary: "Особенности персонажа и связанные с ними бонусы.",
     icon: Flame,
-    ready: false,
+    ready: true,
   },
   {
     slug: "backgrounds",
     title: "Предыстории",
     summary: "Жизнь до приключений: умения, снаряжение, особенности.",
     icon: ScrollText,
-    ready: false,
+    ready: true,
   },
 ];
 
