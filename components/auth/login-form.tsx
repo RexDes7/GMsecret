@@ -62,10 +62,15 @@ export function LoginForm() {
       };
       signIn(session);
       try {
-        // Pull fresh profile fields from the server so the header/avatar
-        // reflect any edits made on another device as soon as the user
-        // signs back in.
-        const profile = await UserClient.me(session);
+        // `ensure` upserts on the server with the real email. This both
+        // pulls fresh profile fields (so the header/avatar reflects edits
+        // made on another device) AND, for users logging in for the first
+        // time on this server, materialises their profile with the email
+        // they actually typed instead of the `<username>@local.invalid`
+        // placeholder that `GET /api/users/me` would auto-create. Without
+        // this, the very next login could not be resolved by
+        // `lookupByEmail` since the server would have a placeholder.
+        const profile = await UserClient.ensure(session, parsed.data.email);
         signIn({
           ...session,
           role: profile.role,

@@ -17,7 +17,16 @@ import path from "node:path";
 
 const DATA_DIR = path.join(process.cwd(), ".data");
 
-const locks = new Map<string, Promise<unknown>>();
+// Pin the per-collection write-lock Map on `globalThis` so it survives Next
+// dev HMR re-evaluation. A plain module-level `new Map()` would be reset
+// whenever this module reloads, orphaning any in-flight lock chains and
+// allowing two concurrent writers to read-modify-write the same JSON file
+// at once (the second writer silently overwriting the first).
+type LockGlobal = { __gmsh_file_locks?: Map<string, Promise<unknown>> };
+const lockGlobal = globalThis as LockGlobal;
+const locks: Map<string, Promise<unknown>> =
+  lockGlobal.__gmsh_file_locks ?? new Map();
+lockGlobal.__gmsh_file_locks = locks;
 
 async function withLock<T>(name: string, fn: () => Promise<T>): Promise<T> {
   const prev = locks.get(name) ?? Promise.resolve();
