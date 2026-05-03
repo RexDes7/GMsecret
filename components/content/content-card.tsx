@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import type { ContentRecord } from "@/lib/schemas/content";
 import { CONTENT_TYPE_LABEL_RU } from "@/components/content/labels";
@@ -40,13 +39,19 @@ export function ContentCard({
       className="group relative overflow-hidden rounded-xl border border-border/60 bg-card/40"
     >
       <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted/40">
-        <Image
+        {/*
+          User-controlled images (portraitUrl / imageUrl) come from arbitrary
+          hosts. We deliberately use a plain <img> instead of next/image so we
+          don't have to allow-list every possible avatar/image domain in
+          next.config — and so an unknown host doesn't crash SSR with
+          "hostname not configured".
+        */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src={thumb}
           alt={c.title}
-          fill
-          sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 95vw"
           loading="lazy"
-          className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+          className="absolute inset-0 size-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
         />
         <span className="absolute left-3 top-3 rounded-full border border-border/60 bg-background/80 px-2 py-0.5 text-[11px] uppercase tracking-wider text-muted-foreground backdrop-blur">
           {CONTENT_TYPE_LABEL_RU[c.type]}

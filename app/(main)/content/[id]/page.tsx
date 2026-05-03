@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { ContentRecord } from "@/lib/schemas/content";
 import { contentRepository } from "@/lib/db";
@@ -106,7 +105,13 @@ function CharacterView({
       </div>
       {data.portraitUrl ? (
         <div className="relative aspect-[3/4] max-w-xs overflow-hidden rounded-xl">
-          <Image src={data.portraitUrl} alt={data.name} fill sizes="320px" />
+          {/* User-controlled URL — see content-card.tsx note. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={data.portraitUrl}
+            alt={data.name}
+            className="absolute inset-0 size-full object-cover"
+          />
         </div>
       ) : null}
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
