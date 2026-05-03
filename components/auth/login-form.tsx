@@ -40,12 +40,25 @@ export function LoginForm() {
     setSubmitting(true);
     setErrors({});
     try {
-      const username = parsed.data.email.split("@")[0] || "player";
+      // Recover the canonical username/id for this email if the user has
+      // already registered before. Otherwise (no record yet, or lookup
+      // unavailable) fall back to deriving a stable id from the email so
+      // existing demo flows keep working — but registered users always get
+      // their original identity back, so persisted content stays linked.
+      const lookup = await UserClient.lookupByEmail(parsed.data.email).catch(
+        () => null
+      );
+      const username =
+        lookup?.username || parsed.data.email.split("@")[0] || "player";
+      const id = lookup?.id || username;
+      const initialRole =
+        lookup?.role ??
+        (username === "admin" ? ("admin" as const) : ("user" as const));
       const session = {
-        id: username,
+        id,
         email: parsed.data.email,
         username,
-        role: username === "admin" ? ("admin" as const) : ("user" as const),
+        role: initialRole,
       };
       signIn(session);
       try {

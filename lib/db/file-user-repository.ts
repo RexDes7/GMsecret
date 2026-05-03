@@ -58,6 +58,12 @@ export class FileUserRepository implements IUserRepository {
     return list.find((u) => u.username === username);
   }
 
+  async getByEmail(email: string): Promise<UserProfile | undefined> {
+    const needle = email.trim().toLowerCase();
+    const list = await readJson<UserProfile[]>(FILE, []);
+    return list.find((u) => u.email.toLowerCase() === needle);
+  }
+
   async patch(
     id: string,
     patch: UserProfilePatch

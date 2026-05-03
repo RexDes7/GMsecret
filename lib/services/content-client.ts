@@ -25,8 +25,10 @@ function toQuery(args: ListArgs | undefined): string {
   if (args.type) sp.set("type", args.type);
   if (args.authorId) sp.set("authorId", args.authorId);
   if (args.authorUsername) sp.set("authorUsername", args.authorUsername);
-  if (args.onlyPublic) sp.set("onlyPublic", "1");
-  if (args.featured) sp.set("featured", "1");
+  if (args.onlyPublic !== undefined)
+    sp.set("onlyPublic", args.onlyPublic ? "1" : "0");
+  if (args.featured !== undefined)
+    sp.set("featured", args.featured ? "1" : "0");
   if (args.q) sp.set("q", args.q);
   if (args.limit !== undefined) sp.set("limit", String(args.limit));
   if (args.offset !== undefined) sp.set("offset", String(args.offset));

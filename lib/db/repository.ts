@@ -85,5 +85,7 @@ export interface IUserRepository {
 
   getByUsername(username: string): Promise<UserProfile | undefined>;
 
+  getByEmail(email: string): Promise<UserProfile | undefined>;
+
   patch(id: string, patch: UserProfilePatch): Promise<UserProfile | undefined>;
 }
