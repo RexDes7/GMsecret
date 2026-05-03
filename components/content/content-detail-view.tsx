@@ -6,6 +6,7 @@ import {
   ABILITY_LABEL_RU,
   abilityModifier,
 } from "@/lib/services/abilities";
+import { MapPreview } from "@/components/content/map-preview";
 
 /**
  * Single source of truth for rendering a content record. Used by:
@@ -291,72 +292,16 @@ function MapView({
 }: {
   data: Extract<ContentRecord, { type: "map" }>["data"];
 }) {
-  // Render the grid as CSS-grid cells so we don't need a heavy canvas.
-  // For very large maps we cap the visual cell to 24px and let the
-  // container scroll horizontally.
-  const TERRAIN_COLOR: Record<string, string> = {
-    floor: "#3b3a36",
-    wall: "#1c1c1c",
-    door: "#a06a3a",
-    water: "#2c5b8d",
-    lava: "#8e2a18",
-    grass: "#3a5d34",
-    stone: "#4a4a4a",
-    void: "#0a0a0a",
-  };
-  const cell = 16;
   return (
     <div className="space-y-3 text-sm">
       <div className="flex flex-wrap gap-2">
         <Badge>
           {data.width}×{data.height}
         </Badge>
-        <Badge>{data.markers.length} маркеров</Badge>
+        <Badge>{data.markers.length} меток</Badge>
+        <Badge>{(data.objects ?? []).length} объектов</Badge>
       </div>
-      <div
-        className="overflow-auto rounded-lg border border-border/60 bg-background/40 p-3"
-        style={{ maxHeight: "60vh" }}
-      >
-        <div
-          className="relative"
-          style={{
-            width: data.width * cell,
-            height: data.height * cell,
-            display: "grid",
-            gridTemplateColumns: `repeat(${data.width}, ${cell}px)`,
-            gridAutoRows: `${cell}px`,
-          }}
-        >
-          {data.cells.map((row, y) =>
-            row.map((terrain, x) => (
-              <div
-                key={`${x}-${y}`}
-                style={{
-                  background: TERRAIN_COLOR[terrain] ?? "#1a1a1a",
-                }}
-                title={terrain}
-              />
-            ))
-          )}
-          {data.markers.map((m) => (
-            <div
-              key={m.id}
-              className="absolute grid place-items-center rounded-full text-[10px] font-bold"
-              style={{
-                left: m.x * cell,
-                top: m.y * cell,
-                width: cell,
-                height: cell,
-                background: "#dc2626",
-                color: "#fff",
-              }}
-              title={m.label}
-            >
-              ●
-            </div>
-          ))}
-        </div>
-      </div>
+      <MapPreview data={data} />
     </div>
   );
 }

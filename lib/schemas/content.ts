@@ -67,12 +67,30 @@ export const MapMarker = z.object({
   icon: z.string().max(40).optional(),
 });
 
+/**
+ * A discrete asset placed on the map (tree, mountain, table, throne, …).
+ * Position is in cell units and may be fractional so brush scatter looks
+ * natural. `kind` references a key in the inline SVG catalog at
+ * `lib/maps/asset-catalog.ts`. `scale` is a multiplier (1 = one cell wide),
+ * `rotation` is in degrees.
+ */
+export const MapObject = z.object({
+  id: z.string().min(1),
+  kind: z.string().min(1).max(40),
+  x: z.number().min(0),
+  y: z.number().min(0),
+  scale: z.number().min(0.1).max(5).optional(),
+  rotation: z.number().min(-360).max(360).optional(),
+});
+export type MapObjectT = z.infer<typeof MapObject>;
+
 export const MapData = z
   .object({
     width: z.number().int().min(10).max(100),
     height: z.number().int().min(10).max(100),
     cells: z.array(z.array(MapTerrainEnum)),
     markers: z.array(MapMarker).max(256).default([]),
+    objects: z.array(MapObject).max(4096).default([]),
   })
   .superRefine((m, ctx) => {
     if (m.cells.length !== m.height) {
