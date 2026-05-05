@@ -66,20 +66,29 @@ export async function DELETE(req: Request, { params }: { params: Params }) {
     );
   }
   // Cascade: delete all content this user authored so the file repo doesn't
-  // leak orphans pointing at a missing author.
-  const owned = await contentRepository().list({
-    authorId: id,
-    limit: 500,
-    onlyPublic: false,
-  });
-  for (const record of owned.items) {
-    try {
-      await contentRepository().delete(record.id, session);
-    } catch {
-      /* ignore */
+  // leak orphans pointing at a missing author. Loop in case `total` exceeds
+  // the page size (the underlying repo may impose a default limit).
+  let deletedContent = 0;
+  for (let i = 0; i < 100; i++) {
+    const owned = await contentRepository().list({
+      authorId: id,
+      limit: 1000,
+      onlyPublic: false,
+    });
+    if (owned.items.length === 0) break;
+    for (const record of owned.items) {
+      try {
+        await contentRepository().delete(record.id, session);
+        deletedContent += 1;
+      } catch {
+        /* ignore */
+      }
     }
+    // If we got fewer than the page size and it matches the total, we're
+    // done; otherwise re-list because deletes shifted the underlying set.
+    if (owned.items.length < 1000) break;
   }
   const ok = await userRepository().delete(id);
   if (!ok) return NextResponse.json({ error: "not_found" }, { status: 404 });
-  return NextResponse.json({ ok: true, deletedContent: owned.items.length });
+  return NextResponse.json({ ok: true, deletedContent });
 }

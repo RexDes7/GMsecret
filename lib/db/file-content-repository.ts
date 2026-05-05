@@ -61,7 +61,11 @@ export class FileContentRepository implements IContentRepository {
   }
 
   async list(opts?: ListOptions): Promise<ListResult> {
-    const limit = Math.min(100, Math.max(1, opts?.limit ?? 20));
+    // No hard cap on the page size — server-side callers (admin moderation,
+    // analytics, cascade delete) need to be able to enumerate the full
+    // collection. Public clients should pass their own limit. Default page
+    // size stays small (20) to keep anonymous fetches cheap.
+    const limit = Math.max(1, opts?.limit ?? 20);
     const offset = Math.max(0, opts?.offset ?? 0);
     let arr = await all();
     if (opts?.type) arr = arr.filter((c) => c.type === opts.type);
