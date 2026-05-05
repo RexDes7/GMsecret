@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { userRepository } from "@/lib/db";
+import { stripPublicSensitive } from "@/lib/db/safe-profile";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,9 +13,8 @@ export async function GET(_req: Request, { params }: { params: Params }) {
   if (!profile) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
-  // Trim fields that shouldn't leak to anonymous visitors. Email is removed
-  // here; username/displayName/bio/avatarUrl are public by design.
-  const { email: _email, ...publicProfile } = profile;
-  void _email;
-  return NextResponse.json(publicProfile);
+  // Strip both the email and the bcrypt hash before responding — anyone can
+  // hit this endpoint, so anything sensitive must be removed centrally
+  // through `stripPublicSensitive`.
+  return NextResponse.json(stripPublicSensitive(profile));
 }

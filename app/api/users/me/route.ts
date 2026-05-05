@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { userRepository } from "@/lib/db";
 import { requireSession } from "@/lib/auth/session";
+import { stripHash } from "@/lib/db/safe-profile";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,7 +18,7 @@ const UpsertSchema = z.object({
 export async function GET(req: Request) {
   const session = requireSession(req);
   const existing = await userRepository().getById(session.id);
-  if (existing) return NextResponse.json(existing);
+  if (existing) return NextResponse.json(stripHash(existing));
   // Auto-create with a placeholder email when the client hasn't told us one
   // via POST yet. The register flow normally hits POST first.
   const created = await userRepository().upsert({
@@ -26,7 +27,7 @@ export async function GET(req: Request) {
     email: `${session.username}@local.invalid`,
     role: session.role,
   });
-  return NextResponse.json(created);
+  return NextResponse.json(stripHash(created));
 }
 
 /**
@@ -54,7 +55,7 @@ export async function POST(req: Request) {
     email: parsed.data.email,
     role: session.role,
   });
-  return NextResponse.json(profile);
+  return NextResponse.json(stripHash(profile));
 }
 
 const PatchSchema = z.object({
@@ -89,5 +90,5 @@ export async function PATCH(req: Request) {
   if (!updated) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
-  return NextResponse.json(updated);
+  return NextResponse.json(stripHash(updated));
 }

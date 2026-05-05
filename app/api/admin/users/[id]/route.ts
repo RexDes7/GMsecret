@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { contentRepository, userRepository } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/session";
+import { stripHash } from "@/lib/db/safe-profile";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -53,7 +54,7 @@ export async function PATCH(req: Request, { params }: { params: Params }) {
     next = await userRepository().setBanned(id, parsed.data.banned);
   }
 
-  return NextResponse.json(next ?? null);
+  return NextResponse.json(next ? stripHash(next) : null);
 }
 
 export async function DELETE(req: Request, { params }: { params: Params }) {

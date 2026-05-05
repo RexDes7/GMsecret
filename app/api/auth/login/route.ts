@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { userRepository } from "@/lib/db";
+import { stripHash } from "@/lib/db/safe-profile";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -72,7 +73,5 @@ export async function POST(req: Request) {
     );
   }
   // Don't return the hash to the client.
-  const { passwordHash: _hash, ...safe } = profile;
-  void _hash;
-  return NextResponse.json(safe);
+  return NextResponse.json(stripHash(profile));
 }

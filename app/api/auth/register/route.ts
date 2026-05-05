@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { userRepository } from "@/lib/db";
+import { stripHash } from "@/lib/db/safe-profile";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -67,7 +68,5 @@ export async function POST(req: Request) {
   if (!fresh) {
     return NextResponse.json({ error: "internal" }, { status: 500 });
   }
-  const { passwordHash: _hash, ...safe } = fresh;
-  void _hash;
-  return NextResponse.json(safe);
+  return NextResponse.json(stripHash(fresh));
 }
