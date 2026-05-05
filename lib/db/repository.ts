@@ -65,13 +65,28 @@ export type UserProfile = {
   bio: string;
   avatarUrl: string;
   role: "user" | "admin";
+  banned: boolean;
   createdAt: string;
   updatedAt: string;
+  lastSeenAt: string;
 };
 
 export type UserProfilePatch = Partial<
   Pick<UserProfile, "displayName" | "bio" | "avatarUrl">
 >;
+
+export type UserListOptions = {
+  search?: string;
+  role?: "user" | "admin";
+  banned?: boolean;
+  limit?: number;
+  offset?: number;
+};
+
+export type UserListResult = {
+  items: UserProfile[];
+  total: number;
+};
 
 export interface IUserRepository {
   upsert(user: {
@@ -88,4 +103,49 @@ export interface IUserRepository {
   getByEmail(email: string): Promise<UserProfile | undefined>;
 
   patch(id: string, patch: UserProfilePatch): Promise<UserProfile | undefined>;
+
+  // ── admin operations
+  list(opts?: UserListOptions): Promise<UserListResult>;
+  setRole(
+    id: string,
+    role: "user" | "admin"
+  ): Promise<UserProfile | undefined>;
+  setBanned(
+    id: string,
+    banned: boolean
+  ): Promise<UserProfile | undefined>;
+  delete(id: string): Promise<boolean>;
+  touchLastSeen(id: string): Promise<void>;
+}
+
+// ────────────────────────────────────────── Map assets (admin upload)
+
+/**
+ * A custom map asset uploaded by an admin (PNG/JPG/SVG). The `kind` used in
+ * `MapObject.kind` for these assets is `custom:<id>`. The renderer fetches
+ * `fileUrl` lazily on first paint and caches the rasterised image, the same
+ * way it does for built-in inline-SVG assets.
+ */
+export type MapAsset = {
+  id: string;
+  slug: string;
+  nameRu: string;
+  category: "nature" | "furniture" | "structure" | "decor" | "custom";
+  fileUrl: string;
+  mimeType: string;
+  sizeBytes: number;
+  createdAt: string;
+  createdBy: string;
+};
+
+export type MapAssetInput = Omit<MapAsset, "id" | "createdAt"> & {
+  id?: string;
+  createdAt?: string;
+};
+
+export interface IMapAssetRepository {
+  list(): Promise<MapAsset[]>;
+  get(id: string): Promise<MapAsset | undefined>;
+  create(input: MapAssetInput): Promise<MapAsset>;
+  delete(id: string): Promise<boolean>;
 }

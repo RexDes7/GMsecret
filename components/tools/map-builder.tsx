@@ -25,6 +25,8 @@ import {
   drawTerrainSwatch,
   preloadAssets,
 } from "@/lib/maps/renderer";
+import { MapAssetClient } from "@/lib/services/map-asset-client";
+import type { MapAsset as CustomMapAsset } from "@/lib/db/repository";
 
 type Mode = "texture" | "object" | "brush" | "marker" | "erase";
 
@@ -81,6 +83,23 @@ export function MapBuilder() {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const draggingRef = React.useRef(false);
   const lastBrushPosRef = React.useRef<{ x: number; y: number } | null>(null);
+
+  // Admin-uploaded custom map assets — loaded once and exposed as the
+  // "custom" category in the asset picker.
+  const [customAssets, setCustomAssets] = React.useState<CustomMapAsset[]>([]);
+  React.useEffect(() => {
+    let cancelled = false;
+    MapAssetClient.list()
+      .then((items) => {
+        if (!cancelled) setCustomAssets(items);
+      })
+      .catch(() => {
+        /* tolerate offline / 404 — picker just won't show custom tab */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Resize the grid when width/height change, preserving painted state.
   // The intentional in-effect setState is the simplest way to keep cells/
@@ -463,6 +482,26 @@ export function MapBuilder() {
                 </div>
               )
             )}
+            {customAssets.length > 0 ? (
+              <div className="mb-3">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Загруженные (от админов)
+                </p>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {customAssets.map((a) => {
+                    const kind = `custom:${a.id}`;
+                    return (
+                      <CustomAssetButton
+                        key={a.id}
+                        asset={a}
+                        active={assetKind === kind}
+                        onSelect={() => setAssetKind(kind)}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
             <div className="mt-3 grid grid-cols-2 gap-2">
               <NumberField
                 id="scale"
@@ -727,6 +766,39 @@ function AssetButton({
         src={dataUrl}
         alt={asset.nameRu}
         className="size-9"
+        draggable={false}
+      />
+    </button>
+  );
+}
+
+function CustomAssetButton({
+  asset,
+  active,
+  onSelect,
+}: {
+  asset: CustomMapAsset;
+  active: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-pressed={active}
+      title={asset.nameRu}
+      className={
+        "flex aspect-square items-center justify-center rounded-md border bg-background/40 transition-colors " +
+        (active
+          ? "border-primary ring-1 ring-primary"
+          : "border-border/60 hover:border-foreground/30")
+      }
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={asset.fileUrl}
+        alt={asset.nameRu}
+        className="size-9 object-contain"
         draggable={false}
       />
     </button>

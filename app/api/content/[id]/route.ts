@@ -11,7 +11,7 @@ import {
   type ContentType,
 } from "@/lib/schemas/content";
 import { contentRepository } from "@/lib/db";
-import { readSession, requireSession } from "@/lib/auth/session";
+import { assertNotBanned, readSession, requireSession } from "@/lib/auth/session";
 
 const DATA_SCHEMA_BY_TYPE: Record<ContentType, z.ZodTypeAny> = {
   character: CharacterData,
@@ -64,6 +64,7 @@ export async function GET(req: Request, { params }: { params: Params }) {
 export async function PATCH(req: Request, { params }: { params: Params }) {
   const { id } = await params;
   const session = requireSession(req);
+  await assertNotBanned(session);
   let body: unknown;
   try {
     body = await req.json();
@@ -129,6 +130,7 @@ export async function PATCH(req: Request, { params }: { params: Params }) {
 export async function DELETE(req: Request, { params }: { params: Params }) {
   const { id } = await params;
   const session = requireSession(req);
+  await assertNotBanned(session);
   try {
     const ok = await contentRepository().delete(id, session);
     if (!ok) return NextResponse.json({ error: "not_found" }, { status: 404 });

@@ -3,6 +3,7 @@
 import * as React from "react";
 import type { MapDataT } from "@/lib/schemas/content";
 import { drawMap, preloadAssets } from "@/lib/maps/renderer";
+import { MapAssetClient } from "@/lib/services/map-asset-client";
 
 /**
  * Read-only canvas-based preview shared by the modal and the standalone
@@ -13,6 +14,24 @@ export function MapPreview({ data }: { data: MapDataT }) {
   const wrapRef = React.useRef<HTMLDivElement | null>(null);
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const [cell, setCell] = React.useState(16);
+  const [customLoaded, setCustomLoaded] = React.useState(false);
+
+  // Register admin-uploaded custom map assets with the renderer so any
+  // `custom:<id>` references in the map render their PNGs. We don't block
+  // the initial paint on this; once it resolves we trigger a re-paint.
+  React.useEffect(() => {
+    let cancelled = false;
+    MapAssetClient.list()
+      .then(() => {
+        if (!cancelled) setCustomLoaded(true);
+      })
+      .catch(() => {
+        if (!cancelled) setCustomLoaded(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Recompute cell size on mount and on container resize so the map fills
   // the modal/page width without ever overflowing on small screens.
@@ -48,7 +67,7 @@ export function MapPreview({ data }: { data: MapDataT }) {
     return () => {
       cancelled = true;
     };
-  }, [data, cell]);
+  }, [data, cell, customLoaded]);
 
   return (
     <div ref={wrapRef} className="space-y-3 text-sm">

@@ -72,6 +72,14 @@ export function Header() {
         <div className="ml-auto flex items-center gap-3 md:ml-0">
           {user ? (
             <>
+              {user.role === "admin" ? (
+                <Link
+                  href="/admin"
+                  className="hidden items-center gap-1 rounded-lg border border-primary/40 bg-primary/10 px-3 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-primary transition-colors hover:bg-primary/20 sm:inline-flex"
+                >
+                  Админ
+                </Link>
+              ) : null}
               <Link
                 href={`/profile/${user.username}`}
                 className="hidden items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-foreground/85 hover:bg-white/5 hover:text-foreground sm:inline-flex"

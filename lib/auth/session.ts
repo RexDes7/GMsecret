@@ -1,5 +1,6 @@
 import "server-only";
 import type { NextRequest } from "next/server";
+import { userRepository } from "@/lib/db";
 
 /**
  * Minimal server-side session resolver.
@@ -54,4 +55,26 @@ export function requireAdmin(req: Request | NextRequest): ServerSession {
     });
   }
   return s;
+}
+
+/**
+ * Async guard: rejects requests from banned accounts. Use this in any
+ * mutating route the user might still try to call after being banned. Read
+ * paths can stay synchronous since `requireSession` is enough — we don't
+ * try to suppress public reads behind a ban.
+ */
+export async function assertNotBanned(session: ServerSession): Promise<void> {
+  // Admins can never be banned in this model — short-circuit so the admin
+  // user table can't accidentally lock the platform out.
+  if (session.role === "admin") return;
+  const profile = await userRepository().getById(session.id);
+  if (profile?.banned) {
+    throw new Response(
+      JSON.stringify({ error: "banned", message: "Аккаунт заблокирован" }),
+      {
+        status: 403,
+        headers: { "content-type": "application/json" },
+      }
+    );
+  }
 }

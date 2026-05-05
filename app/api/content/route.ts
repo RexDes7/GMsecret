@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { ContentInputSchema, ContentTypeEnum } from "@/lib/schemas/content";
 import { contentRepository } from "@/lib/db";
-import { readSession, requireSession } from "@/lib/auth/session";
+import { assertNotBanned, readSession, requireSession } from "@/lib/auth/session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -56,6 +56,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const session = requireSession(req);
+  await assertNotBanned(session);
   let body: unknown;
   try {
     body = await req.json();

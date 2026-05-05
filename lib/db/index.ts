@@ -1,10 +1,12 @@
 import "server-only";
 import type {
   IContentRepository,
+  IMapAssetRepository,
   IUserRepository,
 } from "@/lib/db/repository";
 import { FileContentRepository } from "@/lib/db/file-content-repository";
 import { FileUserRepository } from "@/lib/db/file-user-repository";
+import { FileMapAssetRepository } from "@/lib/db/file-map-asset-repository";
 
 /**
  * Repository factory. Today the only implementation is the file-backed dev
@@ -19,6 +21,7 @@ import { FileUserRepository } from "@/lib/db/file-user-repository";
 
 let _content: IContentRepository | undefined;
 let _users: IUserRepository | undefined;
+let _mapAssets: IMapAssetRepository | undefined;
 
 export function contentRepository(): IContentRepository {
   _content ??= new FileContentRepository();
@@ -28,4 +31,9 @@ export function contentRepository(): IContentRepository {
 export function userRepository(): IUserRepository {
   _users ??= new FileUserRepository();
   return _users;
+}
+
+export function mapAssetRepository(): IMapAssetRepository {
+  _mapAssets ??= new FileMapAssetRepository();
+  return _mapAssets;
 }

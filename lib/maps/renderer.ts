@@ -227,43 +227,124 @@ function paintTerrain(
   }
 }
 
-// ─────────────────────────────────────── SVG → Image cache
+// ─────────────────────────────────────── Image cache (built-in SVGs + custom uploads)
 
 const imageCache = new Map<string, HTMLImageElement | "loading">();
 const pendingResolves = new Map<string, Array<() => void>>();
+
+/**
+ * Custom map-asset URLs registered by the client (admin uploads exposed via
+ * `/api/map-assets`). Keyed by asset id; objects with `kind = "custom:<id>"`
+ * resolve through this map.
+ */
+const customAssetUrls = new Map<string, string>();
+
+export function registerCustomMapAssets(
+  assets: Array<{ id: string; fileUrl: string }>
+): void {
+  for (const a of assets) {
+    customAssetUrls.set(a.id, a.fileUrl);
+  }
+}
+
+export function clearCustomMapAssets(): void {
+  customAssetUrls.clear();
+}
+
+function resolveWaiters(key: string) {
+  const waiters = pendingResolves.get(key);
+  if (waiters) {
+    pendingResolves.delete(key);
+    for (const fn of waiters) fn();
+  }
+}
+
+function loadFromSource(
+  key: string,
+  attach: (img: HTMLImageElement) => void
+): void {
+  imageCache.set(key, "loading");
+  const img = new Image();
+  img.decoding = "async";
+  img.crossOrigin = "anonymous";
+  img.onload = () => {
+    imageCache.set(key, img);
+    resolveWaiters(key);
+  };
+  img.onerror = () => {
+    imageCache.delete(key);
+    // Resolve waiters even on failure so `preloadAssets` never hangs; the
+    // renderer simply skips the asset on subsequent draws (the loader will
+    // try again next time but `preloadAssets`'s callers are unblocked now).
+    resolveWaiters(key);
+  };
+  attach(img);
+}
 
 function svgToImage(svg: string, key: string): HTMLImageElement | null {
   const cached = imageCache.get(key);
   if (cached && cached !== "loading") return cached;
   if (cached === "loading") return null;
-  imageCache.set(key, "loading");
   const blob = new Blob([svg], { type: "image/svg+xml" });
   const url = URL.createObjectURL(blob);
-  const img = new Image();
-  img.decoding = "async";
-  img.onload = () => {
-    URL.revokeObjectURL(url);
-    imageCache.set(key, img);
-    const waiters = pendingResolves.get(key);
-    if (waiters) {
-      pendingResolves.delete(key);
-      for (const fn of waiters) fn();
-    }
-  };
-  img.onerror = () => {
-    URL.revokeObjectURL(url);
-    imageCache.delete(key);
-    // Resolve waiters even on failure so `preloadAssets` never hangs; the
-    // renderer simply skips the asset on subsequent draws (svgToImage will
-    // try again next time, but `preloadAssets`'s callers are unblocked now).
-    const waiters = pendingResolves.get(key);
-    if (waiters) {
-      pendingResolves.delete(key);
-      for (const fn of waiters) fn();
-    }
-  };
-  img.src = url;
+  loadFromSource(key, (img) => {
+    img.addEventListener(
+      "load",
+      () => URL.revokeObjectURL(url),
+      { once: true }
+    );
+    img.addEventListener(
+      "error",
+      () => URL.revokeObjectURL(url),
+      { once: true }
+    );
+    img.src = url;
+  });
   return null;
+}
+
+function urlToImage(url: string, key: string): HTMLImageElement | null {
+  const cached = imageCache.get(key);
+  if (cached && cached !== "loading") return cached;
+  if (cached === "loading") return null;
+  loadFromSource(key, (img) => {
+    img.src = url;
+  });
+  return null;
+}
+
+/**
+ * Resolves an asset `kind` to a ready-to-draw image, returning `null` while
+ * loading or if the asset is unknown. Built-in inline SVGs and uploaded PNGs
+ * share the same cache so callers don't need to know the source.
+ */
+function getAssetImage(kind: string): HTMLImageElement | null {
+  if (kind.startsWith("custom:")) {
+    const id = kind.slice("custom:".length);
+    const fileUrl = customAssetUrls.get(id);
+    if (!fileUrl) return null;
+    return urlToImage(fileUrl, kind);
+  }
+  const asset = MAP_ASSET_BY_KIND[kind];
+  if (!asset) return null;
+  return svgToImage(asset.svg, kind);
+}
+
+/**
+ * Triggers loading for an asset kind without waiting. `getAssetImage` does
+ * the same and is what the renderer uses; this is exported for unit tests
+ * and any future eager-warm path.
+ */
+function ensureAssetLoading(kind: string): boolean {
+  if (kind.startsWith("custom:")) {
+    const id = kind.slice("custom:".length);
+    const fileUrl = customAssetUrls.get(id);
+    if (!fileUrl) return false;
+    return Boolean(urlToImage(fileUrl, kind));
+  }
+  const asset = MAP_ASSET_BY_KIND[kind];
+  if (!asset) return false;
+  return Boolean(svgToImage(asset.svg, kind));
 }
 
 /**
@@ -277,9 +358,7 @@ export function preloadAssets(
   const kinds = new Set(data.objects.map((o) => o.kind));
   const promises: Promise<void>[] = [];
   for (const kind of kinds) {
-    const asset = MAP_ASSET_BY_KIND[kind];
-    if (!asset) continue;
-    if (svgToImage(asset.svg, kind)) continue;
+    if (ensureAssetLoading(kind)) continue;
     promises.push(
       new Promise<void>((resolve) => {
         const arr = pendingResolves.get(kind) ?? [];
@@ -333,10 +412,8 @@ export function drawMap(
 
   // 3. Objects
   for (const obj of objects) {
-    const asset = MAP_ASSET_BY_KIND[obj.kind];
-    if (!asset) continue;
-    const img = svgToImage(asset.svg, obj.kind);
-    if (!img) continue; // will repaint once loaded
+    const img = getAssetImage(obj.kind);
+    if (!img) continue; // unknown kind, or still loading — repaint will hit again
     const scale = obj.scale ?? 1;
     const size = cell * scale;
     const cx = obj.x * cell;
