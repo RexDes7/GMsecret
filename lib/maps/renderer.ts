@@ -253,6 +253,14 @@ function svgToImage(svg: string, key: string): HTMLImageElement | null {
   img.onerror = () => {
     URL.revokeObjectURL(url);
     imageCache.delete(key);
+    // Resolve waiters even on failure so `preloadAssets` never hangs; the
+    // renderer simply skips the asset on subsequent draws (svgToImage will
+    // try again next time, but `preloadAssets`'s callers are unblocked now).
+    const waiters = pendingResolves.get(key);
+    if (waiters) {
+      pendingResolves.delete(key);
+      for (const fn of waiters) fn();
+    }
   };
   img.src = url;
   return null;
