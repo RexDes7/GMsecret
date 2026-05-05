@@ -21,7 +21,9 @@ const Body = z.object({
  * POST /api/auth/register
  *
  * Creates a new account with a bcrypt-hashed password. Email and username
- * must both be unique. Returns the freshly-created profile (sans hash).
+ * must both be unique — the uniqueness check and the insert run in a
+ * single locked transaction (`createIfUnique`) so two concurrent
+ * registrations can't both succeed and clobber each other.
  */
 export async function POST(req: Request) {
   let body: unknown;
@@ -39,34 +41,19 @@ export async function POST(req: Request) {
   }
   const emailLower = parsed.data.email.toLowerCase();
   const username = parsed.data.username.toLowerCase();
-  const repo = userRepository();
-  const [byEmail, byUsername] = await Promise.all([
-    repo.getByEmail(emailLower),
-    repo.getByUsername(username),
-  ]);
-  if (byEmail) {
-    return NextResponse.json(
-      { error: "email_taken" },
-      { status: 409 }
-    );
-  }
-  if (byUsername) {
-    return NextResponse.json(
-      { error: "username_taken" },
-      { status: 409 }
-    );
-  }
   const hash = await bcrypt.hash(parsed.data.password, 10);
-  const created = await repo.upsert({
+  const result = await userRepository().createIfUnique({
     id: username,
     username,
     email: emailLower,
     role: "user",
+    passwordHash: hash,
   });
-  await repo.setPasswordHash(created.id, hash);
-  const fresh = await repo.getById(created.id);
-  if (!fresh) {
-    return NextResponse.json({ error: "internal" }, { status: 500 });
+  if (!result.ok) {
+    return NextResponse.json(
+      { error: result.conflict === "email" ? "email_taken" : "username_taken" },
+      { status: 409 }
+    );
   }
-  return NextResponse.json(stripHash(fresh));
+  return NextResponse.json(stripHash(result.profile));
 }

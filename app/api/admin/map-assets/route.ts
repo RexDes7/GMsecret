@@ -10,12 +10,12 @@ export const dynamic = "force-dynamic";
 
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "map-assets");
 const MAX_BYTES = 2 * 1024 * 1024;
-const ALLOWED_MIME = new Set([
-  "image/png",
-  "image/jpeg",
-  "image/webp",
-  "image/svg+xml",
-]);
+// Raster only. SVG is intentionally excluded: SVGs can carry inline
+// `<script>` and event handlers, so any user navigating directly to
+// `/uploads/map-assets/<id>.svg` would execute attacker JavaScript in
+// our origin (session theft, CSRF). The canvas renderer doesn't need
+// SVG either — it renders Image() bitmaps just fine from PNG/JPEG/WebP.
+const ALLOWED_MIME = new Set(["image/png", "image/jpeg", "image/webp"]);
 
 const META_SCHEMA = z.object({
   nameRu: z.string().min(1).max(80),
@@ -42,8 +42,6 @@ function extFor(mime: string): string {
       return "jpg";
     case "image/webp":
       return "webp";
-    case "image/svg+xml":
-      return "svg";
     default:
       return "bin";
   }

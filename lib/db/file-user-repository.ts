@@ -205,6 +205,59 @@ export class FileUserRepository implements IUserRepository {
     });
   }
 
+  async createIfUnique(input: {
+    id: string;
+    username: string;
+    email: string;
+    role: "user" | "admin";
+    passwordHash: string;
+  }): Promise<
+    | { ok: true; profile: UserProfile }
+    | { ok: false; conflict: "email" | "username" }
+  > {
+    const now = new Date().toISOString();
+    const emailLower = input.email.toLowerCase();
+    let result:
+      | { ok: true; profile: UserProfile }
+      | { ok: false; conflict: "email" | "username" }
+      | null = null;
+    await updateJson<UserProfile[]>(FILE, [], (list) => {
+      const hydrated = list.map((u) => hydrate(u));
+      // Check inside the locked transaction so concurrent registers can't
+      // both observe "no such user" and then both insert.
+      if (
+        hydrated.some(
+          (u) =>
+            u.id === input.id || u.username.toLowerCase() === input.username.toLowerCase()
+        )
+      ) {
+        result = { ok: false, conflict: "username" };
+        return hydrated;
+      }
+      if (hydrated.some((u) => u.email.toLowerCase() === emailLower)) {
+        result = { ok: false, conflict: "email" };
+        return hydrated;
+      }
+      const created: UserProfile = {
+        id: input.id,
+        username: input.username,
+        email: input.email,
+        displayName: input.username,
+        bio: "",
+        avatarUrl: "",
+        role: input.role,
+        banned: false,
+        passwordHash: input.passwordHash,
+        createdAt: now,
+        updatedAt: now,
+        lastSeenAt: now,
+      };
+      result = { ok: true, profile: created };
+      return [...hydrated, created];
+    });
+    return result!;
+  }
+
   async setPasswordHash(
     id: string,
     hash: string

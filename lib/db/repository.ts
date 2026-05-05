@@ -123,6 +123,23 @@ export interface IUserRepository {
   delete(id: string): Promise<boolean>;
   touchLastSeen(id: string): Promise<void>;
   setPasswordHash(id: string, hash: string): Promise<UserProfile | undefined>;
+
+  /**
+   * Atomically inserts a brand-new user inside the file-store lock so that
+   * the uniqueness check (id + email) and the insert can't be interleaved
+   * by a concurrent register. Returns either the freshly-created profile
+   * or a `conflict` discriminant naming which field collided.
+   */
+  createIfUnique(input: {
+    id: string;
+    username: string;
+    email: string;
+    role: "user" | "admin";
+    passwordHash: string;
+  }): Promise<
+    | { ok: true; profile: UserProfile }
+    | { ok: false; conflict: "email" | "username" }
+  >;
 }
 
 // ────────────────────────────────────────── Map assets (admin upload)

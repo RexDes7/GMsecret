@@ -41,23 +41,4 @@ export const UserClient = {
     }
   },
 
-  /**
-   * Resolve the canonical id/username for an email so login can rehydrate
-   * the original session identity (instead of deriving a brand-new id from
-   * the email local part on every login).
-   */
-  async lookupByEmail(
-    email: string
-  ): Promise<{ id: string; username: string; role: "user" | "admin" } | null> {
-    try {
-      return await apiFetch<{
-        id: string;
-        username: string;
-        role: "user" | "admin";
-      }>(`/api/users/lookup?email=${encodeURIComponent(email)}`);
-    } catch (e) {
-      if ((e as Error).message === "not_found") return null;
-      throw e;
-    }
-  },
 };

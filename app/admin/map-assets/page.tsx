@@ -93,7 +93,7 @@ export default function AdminMapAssetsPage() {
           Ассеты карт
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Загруженные здесь PNG/SVG-картинки попадают в каталог конструктора
+          Загруженные здесь растровые картинки (PNG/JPG/WebP) попадают в каталог конструктора
           карт во вкладку «Загруженные» и доступны всем пользователям при
           размещении и просмотре.
         </p>
@@ -104,11 +104,11 @@ export default function AdminMapAssetsPage() {
         className="grid gap-4 rounded-xl border border-border/60 bg-background/40 p-5 sm:grid-cols-2"
       >
         <div>
-          <Label htmlFor="file">Файл (PNG, JPG, WebP, SVG; до 2 МБ)</Label>
+          <Label htmlFor="file">Файл (PNG, JPG, WebP; до 2 МБ)</Label>
           <input
             id="file"
             type="file"
-            accept="image/png,image/jpeg,image/webp,image/svg+xml"
+            accept="image/png,image/jpeg,image/webp"
             onChange={(e) => {
               const f = e.target.files?.[0] ?? null;
               setFile(f);
