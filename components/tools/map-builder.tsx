@@ -263,10 +263,20 @@ export function MapBuilder() {
 
   // ─────────────────────────── Save / export
 
-  function exportPng() {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    canvas.toBlob((blob) => {
+  async function exportPng() {
+    // Render to a fresh offscreen canvas with `showGrid: false` so the
+    // exported file never contains the editor grid overlay regardless of
+    // the on-screen toggle. Wait for assets to finish loading first so
+    // brush-painted forests/furniture don't disappear from the export.
+    const offscreen = document.createElement("canvas");
+    offscreen.width = width * zoom;
+    offscreen.height = height * zoom;
+    const ctx = offscreen.getContext("2d");
+    if (!ctx) return;
+    const data: MapDataT = { width, height, cells, markers, objects };
+    await preloadAssets({ objects });
+    drawMap(ctx, data, zoom, { showGrid: false });
+    offscreen.toBlob((blob) => {
       if (!blob) return;
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");

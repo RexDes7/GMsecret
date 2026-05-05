@@ -1,8 +1,26 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import type { ContentInput } from "@/lib/schemas/content";
+import {
+  ArtifactData,
+  CharacterData,
+  CreatureData,
+  ItemData,
+  MapData,
+  SpellData,
+  type ContentInput,
+  type ContentType,
+} from "@/lib/schemas/content";
 import { contentRepository } from "@/lib/db";
 import { readSession, requireSession } from "@/lib/auth/session";
+
+const DATA_SCHEMA_BY_TYPE: Record<ContentType, z.ZodTypeAny> = {
+  character: CharacterData,
+  map: MapData,
+  item: ItemData,
+  spell: SpellData,
+  artifact: ArtifactData,
+  creature: CreatureData,
+};
 
 // Partial-patch schema. We avoid `.partial()` on `ContentInputSchema` because
 // that's a ZodIntersection (union of types + shared fields) and Zod doesn't
@@ -58,6 +76,30 @@ export async function PATCH(req: Request, { params }: { params: Params }) {
       { error: "invalid_input", issues: parsed.error.issues },
       { status: 400 }
     );
+  }
+  // When the patch carries a `data` payload, validate it eagerly against
+  // the existing record's `type` so the client gets a focused error
+  // (e.g. "missing field abilityScores.str") instead of a deep
+  // discriminated-union error from inside the repository.
+  if (parsed.data.data !== undefined) {
+    const existing = await contentRepository().get(id);
+    if (!existing) {
+      return NextResponse.json({ error: "not_found" }, { status: 404 });
+    }
+    const dataSchema = DATA_SCHEMA_BY_TYPE[existing.type];
+    const dataParse = dataSchema.safeParse(parsed.data.data);
+    if (!dataParse.success) {
+      return NextResponse.json(
+        {
+          error: "invalid_input",
+          field: "data",
+          contentType: existing.type,
+          issues: dataParse.error.issues,
+        },
+        { status: 400 }
+      );
+    }
+    parsed.data.data = dataParse.data;
   }
   try {
     const updated = await contentRepository().update(
