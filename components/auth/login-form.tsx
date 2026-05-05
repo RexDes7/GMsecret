@@ -6,7 +6,6 @@ import { loginSchema, type LoginInput } from "@/lib/schemas/auth";
 import { ru } from "@/lib/i18n/ru";
 import { useAuth } from "@/components/providers/auth-provider";
 import { safeRedirect } from "@/lib/auth/safe-redirect";
-import { UserClient } from "@/lib/services/user-client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -40,49 +39,48 @@ export function LoginForm() {
     setSubmitting(true);
     setErrors({});
     try {
-      // Recover the canonical username/id for this email if the user has
-      // already registered before. Otherwise (no record yet, or lookup
-      // unavailable) fall back to deriving a stable id from the email so
-      // existing demo flows keep working — but registered users always get
-      // their original identity back, so persisted content stays linked.
-      const lookup = await UserClient.lookupByEmail(parsed.data.email).catch(
-        () => null
-      );
-      const username =
-        lookup?.username || parsed.data.email.split("@")[0] || "player";
-      const id = lookup?.id || username;
-      const initialRole =
-        lookup?.role ??
-        (username === "admin" ? ("admin" as const) : ("user" as const));
-      const session = {
-        id,
-        email: parsed.data.email,
-        username,
-        role: initialRole,
-      };
-      signIn(session);
-      try {
-        // `ensure` upserts on the server with the real email. This both
-        // pulls fresh profile fields (so the header/avatar reflects edits
-        // made on another device) AND, for users logging in for the first
-        // time on this server, materialises their profile with the email
-        // they actually typed instead of the `<username>@local.invalid`
-        // placeholder that `GET /api/users/me` would auto-create. Without
-        // this, the very next login could not be resolved by
-        // `lookupByEmail` since the server would have a placeholder.
-        const profile = await UserClient.ensure(session, parsed.data.email);
-        signIn({
-          ...session,
-          role: profile.role,
-          displayName: profile.displayName,
-          bio: profile.bio,
-          avatarUrl: profile.avatarUrl,
-        });
-      } catch {
-        /* ignore — auto-create will happen on next GET */
+      // Real password check — server compares the bcrypt hash and only
+      // returns the canonical profile on a match. On a 401 we surface the
+      // generic invalid-credentials message; on 403 (banned) we tell the
+      // user explicitly so they don't think it's a typo.
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          email: parsed.data.email,
+          password: parsed.data.password,
+        }),
+      });
+      if (res.status === 403) {
+        setErrors({ form: "Аккаунт заблокирован" });
+        setSubmitting(false);
+        return;
       }
+      if (!res.ok) {
+        setErrors({ form: ru.auth.errors.invalidCredentials });
+        setSubmitting(false);
+        return;
+      }
+      const profile = (await res.json()) as {
+        id: string;
+        username: string;
+        email: string;
+        role: "user" | "admin";
+        displayName: string;
+        bio: string;
+        avatarUrl: string;
+      };
+      signIn({
+        id: profile.id,
+        email: profile.email,
+        username: profile.username,
+        role: profile.role,
+        displayName: profile.displayName,
+        bio: profile.bio,
+        avatarUrl: profile.avatarUrl,
+      });
       const raw = new URLSearchParams(window.location.search).get("redirect");
-      router.replace(safeRedirect(raw, `/profile/${username}`));
+      router.replace(safeRedirect(raw, `/profile/${profile.username}`));
     } catch {
       setErrors({ form: ru.auth.errors.invalidCredentials });
     } finally {

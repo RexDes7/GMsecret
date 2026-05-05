@@ -21,6 +21,7 @@ function hydrate(raw: Partial<UserProfile> & { id: string }): UserProfile {
     avatarUrl: raw.avatarUrl ?? "",
     role: raw.role === "admin" ? "admin" : "user",
     banned: Boolean(raw.banned ?? false),
+    passwordHash: raw.passwordHash,
     createdAt: raw.createdAt ?? new Date().toISOString(),
     updatedAt: raw.updatedAt ?? raw.createdAt ?? new Date().toISOString(),
     lastSeenAt:
@@ -202,6 +203,24 @@ export class FileUserRepository implements IUserRepository {
       next[idx] = { ...hydrated[idx]!, lastSeenAt: now };
       return next;
     });
+  }
+
+  async setPasswordHash(
+    id: string,
+    hash: string
+  ): Promise<UserProfile | undefined> {
+    const now = new Date().toISOString();
+    let out: UserProfile | undefined;
+    await updateJson<UserProfile[]>(FILE, [], (list) => {
+      const hydrated = list.map((u) => hydrate(u));
+      const idx = hydrated.findIndex((u) => u.id === id);
+      if (idx === -1) return hydrated;
+      out = { ...hydrated[idx]!, passwordHash: hash, updatedAt: now };
+      const next = hydrated.slice();
+      next[idx] = out;
+      return next;
+    });
+    return out;
   }
 }
 

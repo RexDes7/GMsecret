@@ -66,6 +66,12 @@ export type UserProfile = {
   avatarUrl: string;
   role: "user" | "admin";
   banned: boolean;
+  /**
+   * bcrypt hash of the user's password. Optional only because legacy
+   * accounts created before passwords existed may lack it; new accounts
+   * always set it on register.
+   */
+  passwordHash?: string;
   createdAt: string;
   updatedAt: string;
   lastSeenAt: string;
@@ -116,6 +122,7 @@ export interface IUserRepository {
   ): Promise<UserProfile | undefined>;
   delete(id: string): Promise<boolean>;
   touchLastSeen(id: string): Promise<void>;
+  setPasswordHash(id: string, hash: string): Promise<UserProfile | undefined>;
 }
 
 // ────────────────────────────────────────── Map assets (admin upload)

@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { registerSchema, type RegisterInput } from "@/lib/schemas/auth";
 import { ru } from "@/lib/i18n/ru";
 import { useAuth } from "@/components/providers/auth-provider";
-import { UserClient } from "@/lib/services/user-client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -68,36 +67,57 @@ export function RegisterForm() {
     setSubmitting(true);
     setErrors({});
     try {
-      // Username is used as the user id until a real auth backend issues
-      // stable ids — this keeps everything coherent across the
-      // client/server boundary.
-      const session = {
-        id: parsed.data.username,
-        email: parsed.data.email,
-        username: parsed.data.username,
-        role: "user" as const,
-      };
-      signIn(session);
-      // Materialise the profile on the server. If it fails we still let the
-      // user through (they'll retry on next profile read) — shouldn't block
-      // the happy path of "signed up, redirected to profile".
-      try {
-        const profile = await UserClient.ensure(session, parsed.data.email);
-        signIn({
-          ...session,
-          // Honour the server-side role: if this username is already an admin
-          // (the repository's upsert never downgrades), keep them admin in the
-          // client session too. Otherwise re-registering an existing admin
-          // username would silently demote them in headers/UI.
-          role: profile.role,
-          displayName: profile.displayName,
-          bio: profile.bio,
-          avatarUrl: profile.avatarUrl,
-        });
-      } catch {
-        /* ignore — profile will be auto-created on first /api/users/me GET */
+      // Server hashes the password with bcrypt and creates the account.
+      // 409 conflicts (email/username already taken) surface as field-level
+      // errors so the form can highlight them; everything else falls back
+      // to the generic message.
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          email: parsed.data.email,
+          username: parsed.data.username,
+          password: parsed.data.password,
+        }),
+      });
+      if (res.status === 409) {
+        const body = (await res.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        if (body.error === "email_taken") {
+          setErrors({ email: "Этот email уже занят" });
+        } else if (body.error === "username_taken") {
+          setErrors({ username: "Этот никнейм уже занят" });
+        } else {
+          setErrors({ form: ru.auth.errors.generic });
+        }
+        setSubmitting(false);
+        return;
       }
-      router.replace(`/profile/${parsed.data.username}`);
+      if (!res.ok) {
+        setErrors({ form: ru.auth.errors.generic });
+        setSubmitting(false);
+        return;
+      }
+      const profile = (await res.json()) as {
+        id: string;
+        username: string;
+        email: string;
+        role: "user" | "admin";
+        displayName: string;
+        bio: string;
+        avatarUrl: string;
+      };
+      signIn({
+        id: profile.id,
+        email: profile.email,
+        username: profile.username,
+        role: profile.role,
+        displayName: profile.displayName,
+        bio: profile.bio,
+        avatarUrl: profile.avatarUrl,
+      });
+      router.replace(`/profile/${profile.username}`);
     } catch {
       setErrors({ form: ru.auth.errors.generic });
     } finally {
