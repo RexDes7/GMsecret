@@ -331,26 +331,35 @@ function getAssetImage(kind: string): HTMLImageElement | null {
 }
 
 /**
- * Triggers loading for an asset kind without waiting. `getAssetImage` does
- * the same and is what the renderer uses; this is exported for unit tests
- * and any future eager-warm path.
+ * Triggers a load for `kind` and returns its load state:
+ *   - "ready"   : already in cache, no waiting needed
+ *   - "loading" : a request is in flight; caller should wait on `pendingResolves`
+ *   - "unknown" : no source for this kind (deleted custom asset, unregistered
+ *                 catalog entry, …) — caller must NOT wait or it'll hang
+ *                 forever.
  */
-function ensureAssetLoading(kind: string): boolean {
+function ensureAssetLoading(
+  kind: string
+): "ready" | "loading" | "unknown" {
   if (kind.startsWith("custom:")) {
     const id = kind.slice("custom:".length);
     const fileUrl = customAssetUrls.get(id);
-    if (!fileUrl) return false;
-    return Boolean(urlToImage(fileUrl, kind));
+    if (!fileUrl) return "unknown";
+    return urlToImage(fileUrl, kind) ? "ready" : "loading";
   }
   const asset = MAP_ASSET_BY_KIND[kind];
-  if (!asset) return false;
-  return Boolean(svgToImage(asset.svg, kind));
+  if (!asset) return "unknown";
+  return svgToImage(asset.svg, kind) ? "ready" : "loading";
 }
 
 /**
  * Returns a Promise that resolves when every asset kind referenced by the
  * map has been rasterised and is ready to draw. The editor uses this to
  * trigger a redraw once images become available.
+ *
+ * Unknown kinds (e.g. a `custom:<id>` whose admin-uploaded asset was
+ * deleted) are skipped — there's no point in awaiting them. Without this,
+ * `exportPng` would hang forever after a referenced asset disappears.
  */
 export function preloadAssets(
   data: Pick<MapDataT, "objects">
@@ -358,7 +367,8 @@ export function preloadAssets(
   const kinds = new Set(data.objects.map((o) => o.kind));
   const promises: Promise<void>[] = [];
   for (const kind of kinds) {
-    if (ensureAssetLoading(kind)) continue;
+    const state = ensureAssetLoading(kind);
+    if (state !== "loading") continue;
     promises.push(
       new Promise<void>((resolve) => {
         const arr = pendingResolves.get(kind) ?? [];

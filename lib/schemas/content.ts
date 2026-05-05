@@ -76,7 +76,9 @@ export const MapMarker = z.object({
  */
 export const MapObject = z.object({
   id: z.string().min(1),
-  kind: z.string().min(1).max(40),
+  // Built-in kinds are short slugs ("tree-pine"), but admin-uploaded
+  // assets use `custom:<uuid>` which is 43 chars — keep some headroom.
+  kind: z.string().min(1).max(80),
   x: z.number().min(0),
   y: z.number().min(0),
   scale: z.number().min(0.1).max(5).optional(),
