@@ -2,11 +2,13 @@ import "server-only";
 import type {
   IContentRepository,
   IMapAssetRepository,
+  IMapFontRepository,
   IUserRepository,
 } from "@/lib/db/repository";
 import { FileContentRepository } from "@/lib/db/file-content-repository";
 import { FileUserRepository } from "@/lib/db/file-user-repository";
 import { FileMapAssetRepository } from "@/lib/db/file-map-asset-repository";
+import { FileMapFontRepository } from "@/lib/db/file-map-font-repository";
 
 /**
  * Repository factory. Today the only implementation is the file-backed dev
@@ -22,6 +24,7 @@ import { FileMapAssetRepository } from "@/lib/db/file-map-asset-repository";
 let _content: IContentRepository | undefined;
 let _users: IUserRepository | undefined;
 let _mapAssets: IMapAssetRepository | undefined;
+let _mapFonts: IMapFontRepository | undefined;
 
 export function contentRepository(): IContentRepository {
   _content ??= new FileContentRepository();
@@ -36,4 +39,9 @@ export function userRepository(): IUserRepository {
 export function mapAssetRepository(): IMapAssetRepository {
   _mapAssets ??= new FileMapAssetRepository();
   return _mapAssets;
+}
+
+export function mapFontRepository(): IMapFontRepository {
+  _mapFonts ??= new FileMapFontRepository();
+  return _mapFonts;
 }

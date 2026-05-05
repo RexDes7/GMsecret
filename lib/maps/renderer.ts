@@ -13,8 +13,9 @@
  *   cell size, or grid visibility changes.
  */
 
-import type { MapDataT, MapTerrain } from "@/lib/schemas/content";
+import type { MapDataT, MapTerrain, MapTextT } from "@/lib/schemas/content";
 import { MAP_ASSET_BY_KIND } from "./asset-catalog";
+import { resolveFontFamily } from "./fonts";
 
 export type DrawOptions = {
   showGrid?: boolean;
@@ -388,7 +389,7 @@ export function drawMap(
   cell: number,
   options: DrawOptions = {}
 ) {
-  const { width, height, cells, objects, markers } = data;
+  const { width, height, cells, objects, markers, texts } = data;
   ctx.clearRect(0, 0, width * cell, height * cell);
 
   // 1. Terrain
@@ -439,7 +440,15 @@ export function drawMap(
     }
   }
 
-  // 4. Markers
+  // 4. Free-floating text annotations. Drawn before markers so room
+  // labels sit under any pins placed at the same spot.
+  if (texts && texts.length) {
+    for (const t of texts) {
+      drawText(ctx, t, cell);
+    }
+  }
+
+  // 5. Markers
   if (options.showMarkers !== false) {
     for (const m of markers) {
       const cx = (m.x + 0.5) * cell;
@@ -458,6 +467,40 @@ export function drawMap(
       ctx.fillText(m.label.slice(0, 1).toUpperCase(), cx, cy);
     }
   }
+}
+
+/**
+ * Render one text annotation. `t.fontSize` is in cell units; we multiply
+ * by the current cell size so text scales sharply with the editor's zoom.
+ */
+function drawText(
+  ctx: CanvasRenderingContext2D,
+  t: MapTextT,
+  cell: number
+) {
+  const family = resolveFontFamily(t.fontFamily);
+  const sizePx = Math.max(6, t.fontSize * cell);
+  const weight = t.bold ? "bold" : "normal";
+  const style = t.italic ? "italic" : "normal";
+  ctx.save();
+  ctx.translate(t.x * cell, t.y * cell);
+  if (t.rotation) ctx.rotate((t.rotation * Math.PI) / 180);
+  ctx.font = `${style} ${weight} ${sizePx}px ${family}, serif`;
+  ctx.fillStyle = t.color;
+  ctx.textAlign = t.align;
+  ctx.textBaseline = "middle";
+  ctx.lineWidth = Math.max(2, sizePx / 12);
+  ctx.strokeStyle = "rgba(0,0,0,0.55)";
+  const lines = t.text.split(/\r?\n/);
+  const lineHeight = sizePx * 1.15;
+  const totalHeight = lineHeight * lines.length;
+  let y = -totalHeight / 2 + lineHeight / 2;
+  for (const line of lines) {
+    ctx.strokeText(line, 0, y);
+    ctx.fillText(line, 0, y);
+    y += lineHeight;
+  }
+  ctx.restore();
 }
 
 /** A flat colour swatch used by the texture palette buttons. */

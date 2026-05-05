@@ -173,3 +173,35 @@ export interface IMapAssetRepository {
   create(input: MapAssetInput): Promise<MapAsset>;
   delete(id: string): Promise<boolean>;
 }
+
+// ────────────────────────────────────────── Map fonts (admin upload)
+
+/**
+ * A custom font uploaded by an admin (TTF/OTF/WOFF/WOFF2). Registered on
+ * the client via `FontFace` API and used by `MapText.fontFamily` as
+ * `custom:<slug>`. We store the original file URL and the slug used as
+ * the CSS font-family name when registered.
+ */
+export type MapFont = {
+  id: string;
+  slug: string;
+  nameRu: string;
+  fileUrl: string;
+  mimeType: string;
+  sizeBytes: number;
+  createdAt: string;
+  createdBy: string;
+};
+
+export type MapFontInput = Omit<MapFont, "id" | "createdAt"> & {
+  id?: string;
+  createdAt?: string;
+};
+
+export interface IMapFontRepository {
+  list(): Promise<MapFont[]>;
+  get(id: string): Promise<MapFont | undefined>;
+  getBySlug(slug: string): Promise<MapFont | undefined>;
+  create(input: MapFontInput): Promise<MapFont>;
+  delete(id: string): Promise<boolean>;
+}

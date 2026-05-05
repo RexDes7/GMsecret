@@ -10,6 +10,7 @@ const NAV: Array<{ href: string; label: string }> = [
   { href: "/admin/content", label: "Контент" },
   { href: "/admin/users", label: "Пользователи" },
   { href: "/admin/map-assets", label: "Ассеты карт" },
+  { href: "/admin/map-fonts", label: "Шрифты карт" },
   { href: "/admin/analytics", label: "Аналитика" },
 ];
 

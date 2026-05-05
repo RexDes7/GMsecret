@@ -11,14 +11,6 @@ export const UserClient = {
     return apiFetch<UserProfile>("/api/users/me", { user });
   },
 
-  async ensure(user: SessionUser, email: string): Promise<UserProfile> {
-    return apiFetch<UserProfile>("/api/users/me", {
-      method: "POST",
-      user,
-      body: { email },
-    });
-  },
-
   async patchMe(
     user: SessionUser,
     patch: UserProfilePatch

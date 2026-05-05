@@ -86,6 +86,35 @@ export const MapObject = z.object({
 });
 export type MapObjectT = z.infer<typeof MapObject>;
 
+/**
+ * Free-floating text annotation placed on the map (room labels, captions,
+ * encounter numbers, etc.). Position is in cell units (fractional). Text
+ * is rendered in cell units via canvas, then scaled with the viewport so
+ * it stays sharp at every zoom level.
+ *
+ * `fontFamily` is either a built-in CSS font ("serif", "sans") or a slug
+ * of an admin-uploaded font file registered via `MapFont`.
+ */
+export const MapText = z.object({
+  id: z.string().min(1),
+  x: z.number().min(0),
+  y: z.number().min(0),
+  text: z.string().min(1).max(280),
+  // CSS font family or "custom:<slug>" referencing an admin-uploaded font.
+  fontFamily: z.string().min(1).max(80).default("serif"),
+  // Size in cell units, so 1 = roughly one cell tall.
+  fontSize: z.number().min(0.2).max(8).default(0.9),
+  color: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/, "Цвет должен быть HEX (#rrggbb)")
+    .default("#ffffff"),
+  bold: z.boolean().default(false),
+  italic: z.boolean().default(false),
+  align: z.enum(["left", "center", "right"]).default("center"),
+  rotation: z.number().min(-360).max(360).default(0),
+});
+export type MapTextT = z.infer<typeof MapText>;
+
 export const MapData = z
   .object({
     width: z.number().int().min(10).max(100),
@@ -93,6 +122,7 @@ export const MapData = z
     cells: z.array(z.array(MapTerrainEnum)),
     markers: z.array(MapMarker).max(256).default([]),
     objects: z.array(MapObject).max(4096).default([]),
+    texts: z.array(MapText).max(256).default([]),
   })
   .superRefine((m, ctx) => {
     if (m.cells.length !== m.height) {

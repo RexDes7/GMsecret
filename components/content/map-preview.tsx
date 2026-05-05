@@ -4,6 +4,8 @@ import * as React from "react";
 import type { MapDataT } from "@/lib/schemas/content";
 import { drawMap, preloadAssets } from "@/lib/maps/renderer";
 import { MapAssetClient } from "@/lib/services/map-asset-client";
+import { MapFontClient } from "@/lib/services/map-font-client";
+import { subscribeFontLoaded } from "@/lib/maps/fonts";
 
 /**
  * Read-only canvas-based preview shared by the modal and the standalone
@@ -16,18 +18,18 @@ export function MapPreview({ data }: { data: MapDataT }) {
   const [cell, setCell] = React.useState(16);
   const [customLoaded, setCustomLoaded] = React.useState(false);
 
-  // Register admin-uploaded custom map assets with the renderer so any
-  // `custom:<id>` references in the map render their PNGs. We don't block
-  // the initial paint on this; once it resolves we trigger a re-paint.
+  // Register admin-uploaded custom map assets and fonts with the renderer
+  // so `custom:<id>` references in objects render their PNGs and
+  // `custom:<slug>` references in text annotations render with the right
+  // typeface. We don't block the initial paint; a second paint runs once
+  // assets and fonts resolve.
   React.useEffect(() => {
     let cancelled = false;
-    MapAssetClient.list()
-      .then(() => {
+    Promise.allSettled([MapAssetClient.list(), MapFontClient.list()]).then(
+      () => {
         if (!cancelled) setCustomLoaded(true);
-      })
-      .catch(() => {
-        if (!cancelled) setCustomLoaded(true);
-      });
+      }
+    );
     return () => {
       cancelled = true;
     };
@@ -50,22 +52,24 @@ export function MapPreview({ data }: { data: MapDataT }) {
     return () => ro.disconnect();
   }, [data.width]);
 
-  // Repaint the canvas whenever data or cell size changes; trigger a second
-  // repaint once asset images finish loading.
+  // Repaint the canvas whenever data, cell size, or async resources change.
   React.useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    drawMap(ctx, data, cell, { showGrid: false });
+    const paint = () => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      drawMap(ctx, data, cell, { showGrid: false });
+    };
+    paint();
     let cancelled = false;
     preloadAssets({ objects: data.objects ?? [] }).then(() => {
-      if (cancelled) return;
-      const ctx2 = canvas.getContext("2d");
-      if (ctx2) drawMap(ctx2, data, cell, { showGrid: false });
+      if (!cancelled) paint();
     });
+    const unsub = subscribeFontLoaded(paint);
     return () => {
       cancelled = true;
+      unsub();
     };
   }, [data, cell, customLoaded]);
 
