@@ -137,7 +137,9 @@ export class FileUserRepository implements IUserRepository {
     }
     arr.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
     const total = arr.length;
-    const limit = Math.min(500, Math.max(1, opts.limit ?? 100));
+    // No hard cap — server-side analytics needs to enumerate every user.
+    // Default page size stays small for accidental client calls.
+    const limit = Math.max(1, opts.limit ?? 100);
     const offset = Math.max(0, opts.offset ?? 0);
     return { items: arr.slice(offset, offset + limit), total };
   }

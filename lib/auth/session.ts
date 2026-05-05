@@ -64,11 +64,14 @@ export function requireAdmin(req: Request | NextRequest): ServerSession {
  * try to suppress public reads behind a ban.
  */
 export async function assertNotBanned(session: ServerSession): Promise<void> {
-  // Admins can never be banned in this model — short-circuit so the admin
-  // user table can't accidentally lock the platform out.
-  if (session.role === "admin") return;
+  // Always look the user up server-side — `session.role` comes from a
+  // client-sent header in the placeholder auth model, so a banned user
+  // could spoof `x-user-role: admin` and bypass the ban otherwise. The
+  // admin-exemption applies only to roles persisted in the DB.
   const profile = await userRepository().getById(session.id);
-  if (profile?.banned) {
+  if (!profile) return;
+  if (profile.role === "admin") return;
+  if (profile.banned) {
     throw new Response(
       JSON.stringify({ error: "banned", message: "Аккаунт заблокирован" }),
       {
