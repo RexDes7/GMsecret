@@ -67,15 +67,57 @@ export function RegisterForm() {
     setSubmitting(true);
     setErrors({});
     try {
-      // Backend not yet implemented (tasks 2/3). Mock a successful sign-up.
-      await new Promise((r) => setTimeout(r, 300));
-      signIn({
-        id: parsed.data.username,
-        email: parsed.data.email,
-        username: parsed.data.username,
-        role: "user",
+      // Server hashes the password with bcrypt and creates the account.
+      // 409 conflicts (email/username already taken) surface as field-level
+      // errors so the form can highlight them; everything else falls back
+      // to the generic message.
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          email: parsed.data.email,
+          username: parsed.data.username,
+          password: parsed.data.password,
+        }),
       });
-      router.replace(`/profile/${parsed.data.username}`);
+      if (res.status === 409) {
+        const body = (await res.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        if (body.error === "email_taken") {
+          setErrors({ email: "Этот email уже занят" });
+        } else if (body.error === "username_taken") {
+          setErrors({ username: "Этот никнейм уже занят" });
+        } else {
+          setErrors({ form: ru.auth.errors.generic });
+        }
+        setSubmitting(false);
+        return;
+      }
+      if (!res.ok) {
+        setErrors({ form: ru.auth.errors.generic });
+        setSubmitting(false);
+        return;
+      }
+      const profile = (await res.json()) as {
+        id: string;
+        username: string;
+        email: string;
+        role: "user" | "admin";
+        displayName: string;
+        bio: string;
+        avatarUrl: string;
+      };
+      signIn({
+        id: profile.id,
+        email: profile.email,
+        username: profile.username,
+        role: profile.role,
+        displayName: profile.displayName,
+        bio: profile.bio,
+        avatarUrl: profile.avatarUrl,
+      });
+      router.replace(`/profile/${profile.username}`);
     } catch {
       setErrors({ form: ru.auth.errors.generic });
     } finally {

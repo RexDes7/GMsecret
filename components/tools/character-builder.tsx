@@ -1,13 +1,14 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { CharacterData, type CharacterDataT } from "@/lib/schemas/content";
 import {
   ABILITY_KEYS,
   ABILITY_LABEL_RU,
   abilityModifier,
 } from "@/lib/services/abilities";
-import { ContentService } from "@/lib/services/content.service";
+import { ContentClient } from "@/lib/services/content-client";
 import { useAuth } from "@/components/providers/auth-provider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,17 +29,20 @@ const DEFAULT_DATA: CharacterDataT = {
 
 export function CharacterBuilder() {
   const { user } = useAuth();
+  const router = useRouter();
   const [data, setData] = React.useState<CharacterDataT>(DEFAULT_DATA);
   const [title, setTitle] = React.useState("");
   const [isPublic, setIsPublic] = React.useState(false);
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [savedId, setSavedId] = React.useState<string | null>(null);
+  const [submitting, setSubmitting] = React.useState(false);
+  const [serverError, setServerError] = React.useState<string | null>(null);
 
   function setAbility(k: keyof CharacterDataT["abilityScores"], v: number) {
     setData((d) => ({ ...d, abilityScores: { ...d.abilityScores, [k]: v } }));
   }
 
-  function onSave(e: React.FormEvent) {
+  async function onSave(e: React.FormEvent) {
     e.preventDefault();
     const parsed = CharacterData.safeParse(data);
     if (!parsed.success) {
@@ -50,28 +54,40 @@ export function CharacterBuilder() {
       return;
     }
     setErrors({});
+    setServerError(null);
     if (!user) {
-      // Without auth backend, just log a draft locally.
+      // Unauthenticated: persist a local draft so the form isn't lost on a
+      // subsequent login, then push to /login to finish the save.
       window.localStorage.setItem(
         "gmsh:char-draft",
         JSON.stringify({ title, data, isPublic })
       );
       setSavedId("draft");
+      router.push("/login?redirect=/tools/characters");
       return;
     }
-    const record = ContentService.create(
-      {
-        title: title || data.name || "Безымянный герой",
-        description: data.background || "",
-        isPublic,
-        tags: [data.race, data.class].filter(Boolean) as string[],
-        type: "character",
-        data: parsed.data,
-      },
-      user.id,
-      user.username
-    );
-    setSavedId(record.id);
+    setSubmitting(true);
+    try {
+      const record = await ContentClient.create(
+        {
+          title: title || data.name || "Безымянный герой",
+          description: data.background || "",
+          isPublic,
+          tags: [data.race, data.class].filter(Boolean) as string[],
+          type: "character",
+          data: parsed.data,
+        },
+        user
+      );
+      setSavedId(record.id);
+      // Clean up the local draft now that the record is safely on the
+      // server.
+      window.localStorage.removeItem("gmsh:char-draft");
+    } catch (err) {
+      setServerError((err as Error).message || "unknown");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -224,15 +240,23 @@ export function CharacterBuilder() {
           Опубликовать в сообщество
         </label>
 
-        <Button type="submit" size="lg" className="w-full glow-primary">
-          Сохранить персонажа
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full glow-primary"
+          disabled={submitting}
+        >
+          {submitting ? "Сохраняем…" : "Сохранить персонажа"}
         </Button>
         {savedId ? (
           <p className="text-sm text-primary">
             {savedId === "draft"
-              ? "Черновик сохранён локально."
-              : "Сохранено! ID записи: " + savedId}
+              ? "Черновик сохранён. Войди, чтобы опубликовать."
+              : "Сохранено! Запись доступна в твоём профиле."}
           </p>
+        ) : null}
+        {serverError ? (
+          <p className="text-sm text-destructive">Ошибка: {serverError}</p>
         ) : null}
       </aside>
     </form>

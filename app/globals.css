@@ -62,7 +62,13 @@
   --font-sans:
     var(--font-dudka, ui-sans-serif), system-ui, -apple-system, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-heading: var(--font-cinzel, var(--font-sans));
+  /* Dudka first because it covers both Cyrillic AND Latin with consistent
+     metrics. Cinzel is kept as a secondary fallback for stylistic Latin
+     accents in places where a serif feels right (e.g. the marquee tape).
+     We can't rely on `var(--font-cinzel), var(--font-dudka)` because
+     Next.js silently injects a Times-based "Cinzel Fallback" with Cyrillic
+     coverage that would steal Russian glyphs before Dudka gets a turn. */
+  --font-heading: var(--font-dudka), var(--font-cinzel), sans-serif;
   --font-mono:
     var(--font-geist-mono, ui-monospace), SFMono-Regular, Menlo, monospace;
 
@@ -136,8 +142,10 @@
   h6 {
     font-family: var(--font-heading);
     font-weight: 700;
-    line-height: 1.15;
-    letter-spacing: -0.01em;
+    /* Slightly looser than 1.15 to keep room for accented Cyrillic glyphs
+       (Й, Ё) when wrapped onto multiple lines. */
+    line-height: 1.2;
+    letter-spacing: -0.005em;
   }
 
   /* Subtle parchment-like glow for primary CTAs */
@@ -161,6 +169,18 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+  }
+}
+
+/* Shared marquee keyframe used by DndMarquee and ItemsStrip. Defined
+   globally so the components are self-sufficient and unaffected by
+   styled-jsx scoping. */
+@keyframes gmsh-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
   }
 }
 

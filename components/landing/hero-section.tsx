@@ -1,69 +1,112 @@
 "use client";
 
+import * as React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { ru } from "@/lib/i18n/ru";
-import { Button } from "@/components/ui/button";
 
 export function HeroSection() {
   const prefersReducedMotion = useReducedMotion();
   const t = ru.hero;
+  const [ended, setEnded] = React.useState(false);
 
   return (
     <section
       aria-labelledby="hero-heading"
-      className="relative isolate flex min-h-[88vh] w-full flex-col items-center justify-center overflow-hidden"
+      className="relative isolate -mt-20 flex min-h-screen w-full flex-col justify-center overflow-hidden sm:-mt-24"
     >
-      {/* Background video */}
-      <video
-        className="absolute inset-0 -z-20 size-full object-cover"
-        src="/media/hero.mp4"
-        poster="/media/hero-poster.jpg"
-        autoPlay={!prefersReducedMotion}
-        muted
-        loop
-        playsInline
-        preload="metadata"
-        aria-hidden
-      />
-      {/* Gradient overlay */}
+      {/* Hero artwork. The mp4 plays once on page load, then `onEnded`
+          swaps in the still poster — same composition as the last
+          frame, so the user sees the warrior freeze in place. */}
+      <div className="absolute inset-0 -z-20">
+        <video
+          // ?v=2 busts old browser caches that picked up an earlier
+          // re-encode of this file. Bump on any new mp4.
+          src="/media/hero.mp4?v=2"
+          // Same image is shown as `poster` so the hero is never
+          // a blank rectangle before the first video frame decodes.
+          poster="/media/hero.jpg"
+          // Honour `prefers-reduced-motion`: don't autoplay and don't
+          // preload the file at all — those users only ever see the
+          // still poster, so downloading the mp4 wastes bandwidth and
+          // battery.
+          autoPlay={!prefersReducedMotion}
+          muted
+          playsInline
+          preload={prefersReducedMotion ? "none" : "auto"}
+          aria-hidden
+          onEnded={() => setEnded(true)}
+          className="pointer-events-none h-full w-full object-cover"
+          style={{
+            opacity: ended || prefersReducedMotion ? 0 : 1,
+            transition: "opacity 400ms ease-out",
+          }}
+        />
+        <Image
+          src="/media/hero.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+          style={{
+            opacity: ended || prefersReducedMotion ? 1 : 0,
+            transition: "opacity 400ms ease-out",
+          }}
+        />
+      </div>
+      {/* Soft left-side fade so the headline stays legible without
+          tinting the warrior on the right, plus a bottom fade-to-bg
+          so the next section blends in. */}
       <div
         aria-hidden
-        className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.55)_55%,rgba(0,0,0,0.95)_100%)]"
+        className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(8,3,5,0.75)_0%,rgba(8,3,5,0.4)_35%,rgba(8,3,5,0.05)_60%,rgba(8,3,5,0)_75%)]"
       />
       <div
         aria-hidden
-        className="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-t from-background to-transparent"
+        className="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-b from-transparent to-background"
       />
 
-      <motion.div
-        initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="relative mx-auto flex max-w-3xl flex-col items-center px-6 text-center"
-      >
-        <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-primary">
-          <span className="size-1.5 rounded-full bg-primary" />
-          {t.eyebrow}
-        </span>
-        <h1
-          id="hero-heading"
-          className="text-balance font-[family-name:var(--font-heading)] text-4xl font-bold leading-[1.05] sm:text-5xl md:text-6xl"
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
+        <motion.div
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="relative max-w-xl"
         >
-          {t.title}
-        </h1>
-        <p className="mt-5 max-w-xl text-balance text-base text-muted-foreground sm:text-lg">
-          {t.subtitle}
-        </p>
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Button asChild size="lg" className="glow-primary px-6">
-            <Link href="/register">{t.ctaPrimary}</Link>
-          </Button>
-          <Button asChild size="lg" variant="outline" className="px-6">
-            <Link href="/library">{t.ctaSecondary}</Link>
-          </Button>
-        </div>
-      </motion.div>
+          <p className="mb-4 text-[0.7rem] font-semibold uppercase tracking-[0.36em] text-primary/85 sm:text-xs">
+            {t.eyebrow}
+          </p>
+          <h1
+            id="hero-heading"
+            className="font-[family-name:var(--font-heading)] text-[clamp(1.75rem,4.4vw,3.25rem)] font-bold uppercase leading-[1.22] tracking-[0.005em] [text-wrap:balance]"
+          >
+            {t.title}
+          </h1>
+          <p className="mt-5 max-w-md text-sm leading-relaxed text-foreground/75 sm:text-base [text-wrap:pretty]">
+            {t.subtitle}
+          </p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link
+              href="/register"
+              // `leading-none` collapses the line-box so the
+              // uppercase label sits centred vertically; the
+              // `pl-[…+0.24em]` shim covers the trailing letter-
+              // spacing on the right so the text reads centred.
+              className="inline-flex items-center justify-center rounded-xl bg-foreground px-8 py-3.5 pl-[calc(2rem+0.24em)] text-[0.72rem] font-bold uppercase leading-none tracking-[0.24em] text-background shadow-[0_10px_30px_-10px_rgba(255,255,255,0.45)] transition-transform hover:-translate-y-0.5"
+            >
+              {t.ctaPrimary}
+            </Link>
+            <Link
+              href="/tools"
+              className="inline-flex items-center justify-center rounded-xl border border-foreground/35 bg-black/40 px-8 py-3.5 pl-[calc(2rem+0.24em)] text-[0.72rem] font-bold uppercase leading-none tracking-[0.24em] text-foreground/95 backdrop-blur transition-colors hover:border-foreground/70"
+            >
+              {t.ctaSecondary}
+            </Link>
+          </div>
+        </motion.div>
+      </div>
     </section>
   );
 }

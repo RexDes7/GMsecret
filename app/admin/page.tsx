@@ -1,160 +1,322 @@
 "use client";
 
 import * as React from "react";
-import { AuthGuard } from "@/components/auth/auth-guard";
-import { SAMPLE_CONTENT } from "@/lib/data/sample-content";
+import Link from "next/link";
+import { useAuth } from "@/components/providers/auth-provider";
+import { apiFetch } from "@/lib/services/api-client";
 import { CONTENT_TYPE_LABEL_RU } from "@/components/content/labels";
-import { Button } from "@/components/ui/button";
+import type { ContentType } from "@/lib/schemas/content";
 
-export default function AdminPage() {
+type AnalyticsResponse = {
+  totals: {
+    users: number;
+    content: number;
+    publicContent: number;
+    featuredContent: number;
+    activeUsers7d: number;
+    activeUsers30d: number;
+    newUsers30d: number;
+    bannedUsers: number;
+    adminUsers: number;
+  };
+  contentByType: Record<ContentType, number>;
+  series: { contentLast30d: number[]; signupsLast30d: number[] };
+  recentContent: Array<{
+    id: string;
+    title: string;
+    type: ContentType;
+    authorUsername: string;
+    isPublic: boolean;
+    featured: boolean;
+    createdAt: string;
+  }>;
+  topByViews: Array<{
+    id: string;
+    title: string;
+    type: ContentType;
+    authorUsername: string;
+    views: number;
+  }>;
+  recentUsers: Array<{
+    id: string;
+    username: string;
+    email: string;
+    role: "user" | "admin";
+    banned: boolean;
+    createdAt: string;
+    lastSeenAt: string;
+  }>;
+};
+
+export default function AdminDashboard() {
+  const { user } = useAuth();
+  const [data, setData] = React.useState<AnalyticsResponse | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    apiFetch<AnalyticsResponse>("/api/admin/analytics", { user })
+      .then((res) => {
+        if (!cancelled) setData(res);
+      })
+      .catch((e) => {
+        if (!cancelled) setError((e as Error).message);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
   return (
-    <AuthGuard role="admin">
-      <AdminDashboard />
-    </AuthGuard>
-  );
-}
-
-function AdminDashboard() {
-  const [tab, setTab] = React.useState<"users" | "content" | "logs">("content");
-
-  const sampleUsers = React.useMemo(() => {
-    const seen = new Map<
-      string,
-      { id: string; username: string; createdAt: string }
-    >();
-    for (const c of SAMPLE_CONTENT) {
-      if (!seen.has(c.authorUsername)) {
-        seen.set(c.authorUsername, {
-          id: c.authorId,
-          username: c.authorUsername,
-          createdAt: c.createdAt,
-        });
-      }
-    }
-    return Array.from(seen.values());
-  }, []);
-
-  return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
-      <header className="mb-8">
-        <h1 className="font-[family-name:var(--font-heading)] text-4xl font-bold">
-          Админ-панель
+    <div className="space-y-8">
+      <header>
+        <h1 className="font-[family-name:var(--font-heading)] text-3xl font-bold">
+          Дэшборд
         </h1>
-        <p className="mt-2 text-muted-foreground">
-          Управление пользователями и модерация контента.
+        <p className="mt-1 text-sm text-muted-foreground">
+          Краткий срез по содержанию сайта и активности пользователей.
         </p>
       </header>
 
-      <nav className="mb-6 flex gap-1 border-b border-border/60">
-        <Tab active={tab === "content"} onClick={() => setTab("content")}>
-          Контент
-        </Tab>
-        <Tab active={tab === "users"} onClick={() => setTab("users")}>
-          Пользователи
-        </Tab>
-        <Tab active={tab === "logs"} onClick={() => setTab("logs")}>
-          Журнал
-        </Tab>
-      </nav>
+      {error ? (
+        <div className="rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          {error}
+        </div>
+      ) : null}
 
-      {tab === "content" ? (
-        <table className="w-full overflow-hidden rounded-xl border border-border/60 text-sm">
-          <thead className="bg-muted/30 text-left text-xs uppercase tracking-wider text-muted-foreground">
-            <tr>
-              <th className="px-4 py-2">Заголовок</th>
-              <th className="px-4 py-2">Тип</th>
-              <th className="px-4 py-2">Автор</th>
-              <th className="px-4 py-2">Создано</th>
-              <th className="px-4 py-2">Действия</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border/60">
-            {SAMPLE_CONTENT.map((c) => (
-              <tr key={c.id}>
-                <td className="px-4 py-2">{c.title}</td>
-                <td className="px-4 py-2">{CONTENT_TYPE_LABEL_RU[c.type]}</td>
-                <td className="px-4 py-2">@{c.authorUsername}</td>
-                <td className="px-4 py-2 text-muted-foreground">
-                  {new Date(c.createdAt).toLocaleDateString("ru-RU")}
-                </td>
-                <td className="px-4 py-2">
-                  <div className="flex gap-2">
-                    <Button size="xs" variant="outline">
-                      {c.featured ? "Снять с витрины" : "Выделить"}
-                    </Button>
-                    <Button size="xs" variant="destructive">
-                      Удалить
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : tab === "users" ? (
-        <table className="w-full overflow-hidden rounded-xl border border-border/60 text-sm">
-          <thead className="bg-muted/30 text-left text-xs uppercase tracking-wider text-muted-foreground">
-            <tr>
-              <th className="px-4 py-2">Username</th>
-              <th className="px-4 py-2">ID</th>
-              <th className="px-4 py-2">Регистрация</th>
-              <th className="px-4 py-2">Действия</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border/60">
-            {sampleUsers.map((u) => (
-              <tr key={u.username}>
-                <td className="px-4 py-2">@{u.username}</td>
-                <td className="px-4 py-2 text-muted-foreground">{u.id}</td>
-                <td className="px-4 py-2 text-muted-foreground">
-                  {new Date(u.createdAt).toLocaleDateString("ru-RU")}
-                </td>
-                <td className="px-4 py-2">
-                  <div className="flex gap-2">
-                    <Button size="xs" variant="outline">
-                      Заблокировать
-                    </Button>
-                    <Button size="xs" variant="destructive">
-                      Удалить
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {!data ? (
+        <div className="rounded-xl border border-dashed border-border/60 p-8 text-center text-sm text-muted-foreground">
+          Загрузка…
+        </div>
       ) : (
-        <p className="rounded-xl border border-dashed border-border/60 p-10 text-center text-sm text-muted-foreground">
-          Журнал действий администраторов появится после интеграции с базой
-          данных (модель AdminLog, задача 2.6).
-        </p>
+        <>
+          <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <Stat
+              title="Пользователи"
+              value={data.totals.users}
+              hint={`Активных за 7 дней: ${data.totals.activeUsers7d}`}
+            />
+            <Stat
+              title="Записей контента"
+              value={data.totals.content}
+              hint={`Опубликовано: ${data.totals.publicContent}`}
+            />
+            <Stat
+              title="Новых за 30 дней"
+              value={data.totals.newUsers30d}
+              hint={`Заблокировано: ${data.totals.bannedUsers}`}
+            />
+            <Stat
+              title="Админов"
+              value={data.totals.adminUsers}
+              hint={`На витрине: ${data.totals.featuredContent}`}
+            />
+          </section>
+
+          <section className="grid gap-6 lg:grid-cols-2">
+            <Card title="Контент по типам">
+              <ul className="space-y-1.5 text-sm">
+                {(
+                  Object.entries(data.contentByType) as Array<
+                    [ContentType, number]
+                  >
+                ).map(([type, count]) => (
+                  <li
+                    key={type}
+                    className="flex items-center justify-between gap-3"
+                  >
+                    <span>{CONTENT_TYPE_LABEL_RU[type]}</span>
+                    <span className="tabular-nums text-muted-foreground">
+                      {count}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+            <Card title="Активность за 30 дней">
+              <p className="mb-3 text-xs text-muted-foreground">
+                Регистрации (синий) и созданный контент (оранжевый) по дням.
+              </p>
+              <Sparkline
+                values={data.series.signupsLast30d}
+                color="#3b82f6"
+                label="Регистрации"
+              />
+              <Sparkline
+                values={data.series.contentLast30d}
+                color="#f97316"
+                label="Контент"
+              />
+            </Card>
+          </section>
+
+          <section className="grid gap-6 lg:grid-cols-2">
+            <Card title="Топ по просмотрам">
+              {data.topByViews.length ? (
+                <ul className="space-y-1.5 text-sm">
+                  {data.topByViews.map((c) => (
+                    <li
+                      key={c.id}
+                      className="flex items-center justify-between gap-3"
+                    >
+                      <Link
+                        href={`/content/${c.id}`}
+                        className="truncate hover:underline"
+                      >
+                        {c.title}
+                      </Link>
+                      <span className="tabular-nums text-muted-foreground">
+                        {c.views.toLocaleString("ru-RU")}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Пока нет данных по просмотрам.
+                </p>
+              )}
+            </Card>
+
+            <Card title="Последние записи">
+              <ul className="space-y-1.5 text-sm">
+                {data.recentContent.map((c) => (
+                  <li key={c.id} className="flex items-center gap-3">
+                    <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+                      {CONTENT_TYPE_LABEL_RU[c.type]}
+                    </span>
+                    <Link
+                      href={`/content/${c.id}`}
+                      className="flex-1 truncate hover:underline"
+                    >
+                      {c.title}
+                    </Link>
+                    <span className="text-xs text-muted-foreground">
+                      @{c.authorUsername}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          </section>
+
+          <section>
+            <Card title="Последние регистрации">
+              <table className="w-full text-sm">
+                <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground">
+                  <tr>
+                    <th className="py-1">Username</th>
+                    <th className="py-1">Email</th>
+                    <th className="py-1">Роль</th>
+                    <th className="py-1">Дата</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/40">
+                  {data.recentUsers.map((u) => (
+                    <tr key={u.id}>
+                      <td className="py-1.5">
+                        <Link
+                          href={`/profile/${u.username}`}
+                          className="hover:underline"
+                        >
+                          @{u.username}
+                        </Link>
+                      </td>
+                      <td className="py-1.5 text-muted-foreground">
+                        {u.email}
+                      </td>
+                      <td className="py-1.5">
+                        {u.role === "admin" ? "Админ" : "Пользователь"}
+                        {u.banned ? " · 🚫" : ""}
+                      </td>
+                      <td className="py-1.5 text-muted-foreground">
+                        {new Date(u.createdAt).toLocaleDateString("ru-RU")}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Card>
+          </section>
+        </>
       )}
     </div>
   );
 }
 
-function Tab({
-  active,
-  onClick,
+function Stat({
+  title,
+  value,
+  hint,
+}: {
+  title: string;
+  value: number;
+  hint?: string;
+}) {
+  return (
+    <div className="rounded-xl border border-border/60 bg-background/40 p-4">
+      <p className="text-xs uppercase tracking-wider text-muted-foreground">
+        {title}
+      </p>
+      <p className="mt-1 font-[family-name:var(--font-heading)] text-3xl font-bold tabular-nums">
+        {value.toLocaleString("ru-RU")}
+      </p>
+      {hint ? (
+        <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
+      ) : null}
+    </div>
+  );
+}
+
+function Card({
+  title,
   children,
 }: {
-  active: boolean;
-  onClick: () => void;
+  title: string;
   children: React.ReactNode;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={
-        "px-4 py-2 text-sm transition-colors " +
-        (active
-          ? "border-b-2 border-primary text-primary"
-          : "text-muted-foreground hover:text-foreground")
-      }
-    >
+    <div className="rounded-xl border border-border/60 bg-background/40 p-5">
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </h2>
       {children}
-    </button>
+    </div>
+  );
+}
+
+function Sparkline({
+  values,
+  color,
+  label,
+}: {
+  values: number[];
+  color: string;
+  label: string;
+}) {
+  const max = Math.max(1, ...values);
+  const w = 240;
+  const h = 36;
+  const step = w / Math.max(1, values.length - 1);
+  const points = values
+    .map((v, i) => `${(i * step).toFixed(1)},${(h - (v / max) * h).toFixed(1)}`)
+    .join(" ");
+  const total = values.reduce((s, v) => s + v, 0);
+  return (
+    <div className="mb-2 flex items-center gap-3">
+      <span className="w-24 text-xs text-muted-foreground">{label}</span>
+      <svg viewBox={`0 0 ${w} ${h}`} className="h-9 flex-1">
+        <polyline
+          fill="none"
+          stroke={color}
+          strokeWidth={1.5}
+          points={points}
+        />
+      </svg>
+      <span className="w-12 text-right text-xs tabular-nums text-muted-foreground">
+        {total}
+      </span>
+    </div>
   );
 }

@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { ItemData, type ItemDataT } from "@/lib/schemas/content";
-import { ContentService } from "@/lib/services/content.service";
+import { ContentClient } from "@/lib/services/content-client";
 import { useAuth } from "@/components/providers/auth-provider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,17 +32,20 @@ const DEFAULT: ItemDataT = {
 
 export function ItemBuilder() {
   const { user } = useAuth();
+  const router = useRouter();
   const [data, setData] = React.useState<ItemDataT>(DEFAULT);
   const [title, setTitle] = React.useState("");
   const [isPublic, setIsPublic] = React.useState(false);
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [savedId, setSavedId] = React.useState<string | null>(null);
+  const [submitting, setSubmitting] = React.useState(false);
+  const [serverError, setServerError] = React.useState<string | null>(null);
 
   function set<K extends keyof ItemDataT>(k: K, v: ItemDataT[K]) {
     setData((d) => ({ ...d, [k]: v }));
   }
 
-  function save(e: React.FormEvent) {
+  async function save(e: React.FormEvent) {
     e.preventDefault();
     const parsed = ItemData.safeParse(data);
     if (!parsed.success) {
@@ -53,27 +57,36 @@ export function ItemBuilder() {
       return;
     }
     setErrors({});
+    setServerError(null);
     if (!user) {
       window.localStorage.setItem(
         "gmsh:item-draft",
         JSON.stringify({ title, data, isPublic })
       );
       setSavedId("draft");
+      router.push("/login?redirect=/tools/items");
       return;
     }
-    const r = ContentService.create(
-      {
-        title: title || data.name || "Без названия",
-        description: data.description,
-        isPublic,
-        tags: [data.type, data.rarity],
-        type: "item",
-        data: parsed.data,
-      },
-      user.id,
-      user.username
-    );
-    setSavedId(r.id);
+    setSubmitting(true);
+    try {
+      const r = await ContentClient.create(
+        {
+          title: title || data.name || "Без названия",
+          description: data.description,
+          isPublic,
+          tags: [data.type, data.rarity],
+          type: "item",
+          data: parsed.data,
+        },
+        user
+      );
+      setSavedId(r.id);
+      window.localStorage.removeItem("gmsh:item-draft");
+    } catch (err) {
+      setServerError((err as Error).message || "unknown");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -195,15 +208,23 @@ export function ItemBuilder() {
           />
           Опубликовать в сообщество
         </label>
-        <Button type="submit" size="lg" className="w-full glow-primary">
-          Сохранить предмет
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full glow-primary"
+          disabled={submitting}
+        >
+          {submitting ? "Сохраняем…" : "Сохранить предмет"}
         </Button>
         {savedId ? (
           <p className="text-sm text-primary">
             {savedId === "draft"
-              ? "Черновик сохранён локально."
-              : "Сохранено: " + savedId}
+              ? "Черновик сохранён. Войди, чтобы опубликовать."
+              : "Сохранено! Запись в профиле."}
           </p>
+        ) : null}
+        {serverError ? (
+          <p className="text-sm text-destructive">Ошибка: {serverError}</p>
         ) : null}
       </aside>
     </form>

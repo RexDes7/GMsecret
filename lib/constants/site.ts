@@ -8,13 +8,14 @@ export const SITE = {
   ogImage: "/media/categories/artifacts.jpeg",
 } as const;
 
+/**
+ * Top-level header navigation. Kept short on purpose — the rest of the
+ * tools live behind the "Инструменты" entry, and the highlighted
+ * "Неведомый мир?" call-to-action lives in the header itself.
+ */
 export const NAV_LINKS = [
-  { href: "/", label: "Главная" },
   { href: "/library", label: "Библиотека" },
-  { href: "/community", label: "Сообщество" },
-  { href: "/tools/characters", label: "Персонажи" },
-  { href: "/tools/maps", label: "Карты" },
-  { href: "/tools/items", label: "Предметы" },
+  { href: "/tools", label: "Инструменты" },
 ] as const;
 
 export const FOOTER_LINKS = [
@@ -23,23 +24,20 @@ export const FOOTER_LINKS = [
     items: [
       { href: "/", label: "Главная" },
       { href: "/library", label: "Библиотека" },
-      { href: "/community", label: "Сообщество" },
+      { href: "/library/rules", label: "Как это работает?" },
+      { href: "/community?type=character", label: "Герои долины" },
+      { href: "/register", label: "Отправиться в путь" },
+      { href: "/tools", label: "Инструменты" },
+      { href: "/tools/characters", label: "Войти в игру" },
     ],
   },
   {
-    title: "Инструменты",
+    title: "Пользователь",
     items: [
-      { href: "/tools/characters", label: "Конструктор персонажей" },
-      { href: "/tools/maps", label: "Конструктор карт" },
-      { href: "/tools/items", label: "Конструктор предметов" },
-    ],
-  },
-  {
-    title: "Аккаунт",
-    items: [
-      { href: "/login", label: "Войти" },
+      { href: "/login", label: "Вход" },
       { href: "/register", label: "Регистрация" },
-      { href: "/profile/me", label: "Профиль" },
+      { href: "/library/rules", label: "Правила" },
+      { href: "/community", label: "Техническая поддержка" },
     ],
   },
 ] as const;

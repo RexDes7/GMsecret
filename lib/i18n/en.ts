@@ -24,28 +24,28 @@ export const en: Translations = {
   },
   hero: {
     eyebrow: "The GM's Secret House",
-    title: "Build worlds. Lead heroes. Keep the legends.",
+    title: "Join the ranks of the greatest heroes",
     subtitle:
-      "A complete D&D platform: rules, tools, community, and homebrew — all in one place.",
-    ctaPrimary: "Start the adventure",
-    ctaSecondary: "Browse the library",
+      "A flexible builder with hundreds of races, classes and spells. Forge your perfect build in minutes!",
+    ctaPrimary: "Begin",
+    ctaSecondary: "Tools",
   },
   features: {
     f1: {
-      title: "Rules Reference",
-      desc: "Classes, races, spells, items and creatures — a curated D&D knowledge base.",
+      title: "Build a hero",
+      desc: "A friendly builder that brings your ideas to life.",
     },
     f2: {
-      title: "Creation Tools",
-      desc: "Character, map and item builders with validation and autosave.",
+      title: "Ready-made builds",
+      desc: "Thousands of unique builds shared by the community.",
     },
     f3: {
-      title: "Community",
-      desc: "Share your homebrew, find content by other GMs and players.",
+      title: "Explore D&D",
+      desc: "All lore and rules in one convenient library.",
     },
     f4: {
-      title: "Adventure-Ready",
-      desc: "Dark fantasy UI, fast search, map and portrait export.",
+      title: "Share",
+      desc: "Publish your heroes and earn the spotlight.",
     },
   },
   categories: {
@@ -65,10 +65,10 @@ export const en: Translations = {
     cta: "See all characters",
   },
   cta: {
-    title: "Ready for the table?",
+    title: "Ready for adventure?",
     subtitle:
-      "Sign up to save characters, maps and publish your homebrew in the community.",
-    primary: "Create an account",
+      "Build your hero, share your story, and conquer the Forgotten Realms with thousands of fellow adventurers!",
+    primary: "Begin",
     secondary: "I already have an account",
   },
   auth: {
