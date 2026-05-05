@@ -118,6 +118,83 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     emit();
   }, []);
 
+  // Refresh the cached session from the server on mount and on tab focus.
+  // Without this, a demoted-or-banned user keeps their stale `role: admin`
+  // in localStorage forever and the UI shows admin links it shouldn't.
+  // The server is always the source of truth for role/banned/displayName.
+  React.useEffect(() => {
+    if (!hydrated) return;
+    const cur = read();
+    if (!cur) return;
+    let cancelled = false;
+    const refresh = async () => {
+      try {
+        const res = await fetch("/api/users/me", {
+          headers: {
+            "x-user-id": cur.id,
+            "x-user-name": cur.username,
+            "x-user-role": cur.role,
+          },
+          cache: "no-store",
+        });
+        if (cancelled) return;
+        if (res.status === 401) {
+          // Session no longer valid on the server — sign out locally.
+          signOut();
+          return;
+        }
+        if (!res.ok) return;
+        const profile = (await res.json()) as {
+          id: string;
+          username: string;
+          email: string;
+          role: "user" | "admin";
+          banned?: boolean;
+          displayName?: string;
+          bio?: string;
+          avatarUrl?: string;
+        };
+        if (profile.banned) {
+          signOut();
+          return;
+        }
+        // Only write back if anything actually changed — avoids loops.
+        const next: SessionUser = {
+          id: profile.id,
+          username: profile.username,
+          email: profile.email,
+          role: profile.role,
+          displayName: profile.displayName ?? cur.displayName,
+          bio: profile.bio ?? cur.bio,
+          avatarUrl: profile.avatarUrl ?? cur.avatarUrl,
+        };
+        if (
+          next.id !== cur.id ||
+          next.username !== cur.username ||
+          next.email !== cur.email ||
+          next.role !== cur.role ||
+          next.displayName !== cur.displayName ||
+          next.bio !== cur.bio ||
+          next.avatarUrl !== cur.avatarUrl
+        ) {
+          signIn(next);
+        }
+      } catch {
+        /* offline / network error — keep cached session */
+      }
+    };
+    refresh();
+    const onFocus = () => refresh();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("focus", onFocus);
+    };
+    // We deliberately depend on `hydrated` and the user's id so the effect
+    // only re-runs across login/logout events, not on every unrelated
+    // re-render.
+  }, [hydrated, user?.id, signIn, signOut]);
+
   const value = React.useMemo(
     () => ({ user, status, signIn, signOut }),
     [user, status, signIn, signOut]

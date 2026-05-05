@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
-  requireAdmin(req);
+  await requireAdmin(req);
   const url = new URL(req.url);
   const search = url.searchParams.get("q") ?? undefined;
   const role = url.searchParams.get("role");

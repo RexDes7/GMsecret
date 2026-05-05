@@ -50,13 +50,13 @@ function extFor(mime: string): string {
 }
 
 export async function GET(req: Request) {
-  requireAdmin(req);
+  await requireAdmin(req);
   const items = await mapAssetRepository().list();
   return NextResponse.json({ items });
 }
 
 export async function POST(req: Request) {
-  const session = requireAdmin(req);
+  const session = await requireAdmin(req);
   let form: FormData;
   try {
     form = await req.formData();

@@ -84,20 +84,26 @@ export function MapBuilder() {
   const draggingRef = React.useRef(false);
   const lastBrushPosRef = React.useRef<{ x: number; y: number } | null>(null);
 
-  // Admin-uploaded custom map assets — loaded once and exposed as the
-  // "custom" category in the asset picker.
+  // Admin-uploaded custom map assets — loaded on mount and refreshed any
+  // time the tab regains focus, so that an admin who uploaded a new asset
+  // in another tab sees it appear here without a hard reload.
   const [customAssets, setCustomAssets] = React.useState<CustomMapAsset[]>([]);
   React.useEffect(() => {
     let cancelled = false;
-    MapAssetClient.list()
-      .then((items) => {
-        if (!cancelled) setCustomAssets(items);
-      })
-      .catch(() => {
-        /* tolerate offline / 404 — picker just won't show custom tab */
-      });
+    const refresh = () =>
+      MapAssetClient.list()
+        .then((items) => {
+          if (!cancelled) setCustomAssets(items);
+        })
+        .catch(() => {
+          /* tolerate offline / 404 — picker just won't show custom tab */
+        });
+    refresh();
+    const onFocus = () => refresh();
+    window.addEventListener("focus", onFocus);
     return () => {
       cancelled = true;
+      window.removeEventListener("focus", onFocus);
     };
   }, []);
 

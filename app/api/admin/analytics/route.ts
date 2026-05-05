@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 export async function GET(req: Request) {
-  requireAdmin(req);
+  await requireAdmin(req);
   const [contentResult, userResult] = await Promise.all([
     contentRepository().list({ limit: 1_000_000, onlyPublic: false }),
     userRepository().list({ limit: 1_000_000 }),

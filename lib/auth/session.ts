@@ -46,15 +46,29 @@ export function requireSession(req: Request | NextRequest): ServerSession {
   return s;
 }
 
-export function requireAdmin(req: Request | NextRequest): ServerSession {
+/**
+ * Async admin guard. The cheap synchronous check (header `x-user-role`) is
+ * trivially spoofable, so the real authorisation goes through the user
+ * repository: only the persisted role gives admin access. Banned admins are
+ * also rejected.
+ *
+ * Use this in every `/api/admin/*` route. `requireSession` remains
+ * synchronous and is fine for routes that just need an authenticated user
+ * id, but anything role-gated must go through here.
+ */
+export async function requireAdmin(
+  req: Request | NextRequest
+): Promise<ServerSession> {
   const s = requireSession(req);
-  if (s.role !== "admin") {
+  const profile = await userRepository().getById(s.id);
+  if (!profile || profile.role !== "admin" || profile.banned) {
     throw new Response(JSON.stringify({ error: "forbidden" }), {
       status: 403,
       headers: { "content-type": "application/json" },
     });
   }
-  return s;
+  // Hand back the *DB* role/username so callers see the canonical state.
+  return { id: profile.id, username: profile.username, role: profile.role };
 }
 
 /**

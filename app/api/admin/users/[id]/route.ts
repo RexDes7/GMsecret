@@ -15,7 +15,7 @@ const PatchSchema = z.object({
 type Params = Promise<{ id: string }>;
 
 export async function PATCH(req: Request, { params }: { params: Params }) {
-  const session = requireAdmin(req);
+  const session = await requireAdmin(req);
   const { id } = await params;
   let body: unknown;
   try {
@@ -58,7 +58,7 @@ export async function PATCH(req: Request, { params }: { params: Params }) {
 }
 
 export async function DELETE(req: Request, { params }: { params: Params }) {
-  const session = requireAdmin(req);
+  const session = await requireAdmin(req);
   const { id } = await params;
   if (id === session.id) {
     return NextResponse.json(

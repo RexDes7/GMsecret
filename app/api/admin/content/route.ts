@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
  * on anything regardless of visibility.
  */
 export async function GET(req: Request) {
-  requireAdmin(req);
+  await requireAdmin(req);
   const url = new URL(req.url);
   const typeRaw = url.searchParams.get("type");
   const typeParse = typeRaw ? ContentTypeEnum.safeParse(typeRaw) : null;

@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 type Params = Promise<{ id: string }>;
 
 export async function DELETE(req: Request, { params }: { params: Params }) {
-  requireAdmin(req);
+  await requireAdmin(req);
   const { id } = await params;
   const existing = await mapAssetRepository().get(id);
   if (!existing) {
